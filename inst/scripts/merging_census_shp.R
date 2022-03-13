@@ -5,105 +5,69 @@
 #2. Loading shapefile
 #--> First off, if you go into the MOZmap project repo, in the branch titled ifybranch, you will see a script called MOZ_datapull_final. Line 24 shows you how to read in the shapefile. When you load it you will notice, 80000+ observations, those are the all the areas or villages (not sure which one). Perhaps you can find out by doing some a bit of exploratory work
 
-#command for merg= emerged = merge(sce_all, hhf, by = "userid")
+
 
 
 #1. Loading census data which are .dta file
 #library(haven)
 library(readstata13)
 library(data.table)
-census_full = readstata13::read.dta13("D:/AFR_Database/SSAPOV-Harmonization/Daylan/GMD/MOZ_Census/01.Input/MOZ Pop Census 2017 Full (selected vars).dta")
-##View(x)
-#2. Loading shapefile
 
-##as.data.table(census_full, TRUE)
-##as.data.frame(census_full)
+#Load The data
+census_full <- readstata13::read.dta13("D:/AFR_Database/SSAPOV-Harmonization/Daylan/GMD/MOZ_Census/01.Input/MOZ Pop Census 2017 Full (selected vars).dta")
+
 
 moz_shp <- sf::st_read(dsn = "//esapov/esapov/MOZ/GEO/Population/moz_censusshapefile2017",
                        layer = "BASE_COMPLETA_DE_AE_CENSO_2017")
 
 
-##Change the formar of the variables and create the AES var from the moz_shp
-
-
 census_full$PROVINCIA<- as.integer(census_full$PROVINCIA)
 
-census_full$PROVINCIA<-sprintf("%02d",census_full$PROVINCIA)
-census_full$DISTRITO<-sprintf("%02d",census_full$DISTRITO)
-census_full$POSTO<-sprintf("%02d",census_full$POSTO)
-census_full$LOCALIDADE<-sprintf("%02d",census_full$LOCALIDADE)
-census_full$BAIRRO<-sprintf("%02d",census_full$BAIRRO)
-census_full$AE<-sprintf("%03d",census_full$AE)
-
-census_full$AES<- paste0(census_full$PROVINCIA,census_full$DISTRITO,
-                         census_full$POSTO,census_full$LOCALIDADE,census_full$BAIRRO,
-                         census_full$AE)
-
-## Now we can try to merge the census and the shp file using the AES variable.
+##Keep only the relevant variables from the census_full. (ie. Labour informality and identifiers)
 
 
-
-
-
-
-
-
-
-##Do not run the code below
-
-##This function adds a leading zero for variables with 2 or 3 digits similar to the variables in moz_shp
+##This function adds a leading zero for variables with 2 9similar to the variables in moz_shp
 
 ad_zero02<- function(X){
   return(sprintf("%02d",X))
 }
 
-ad_zero03<- function(X){
-  return(sprintf("%03d",X))
-}
-
-
 ##Apply the funtion to each variable in census_full
 
+new_vars<-apply(census_full[,c("PROVINCIA","DISTRITO","POSTO","LOCALIDADE",
+                                   "BAIRRO")],
+                MARGIN = 2,FUN = ad_zero02)
 
-new_full<-cbind(census_full,apply(census_full[,c("P","DISTRITO","POSTO","LOCALIDADE","BAIRRO")], MARGIN = 2,
-                  FUN = ad_zero02))
+census_full$AE<-sprintf("%03d",census_full$AE)
 
-colnames(new_full)
+##Since the Apply function returns a matrix, we convert it into a data frame
 
-new_full <-make.unique(new_full$P,sep ="_")
+new_vars<- as.data.frame(new_vars)
+
+##Now we change the name of the columns
+
+
+colnames(new_vars)<- c('Province',"District","Postal", "Location","Neighbor")
+
+
+##Merge our our new colums with the census.
+
+Census_merged <- cbind(new_vars,census_full)
+rm(new_vars,census_full)
+
+
+##Create the AES variable to merge with the shp file.
+
+Census_merged$AES<- paste0(Census_merged$Province,Census_merged$District,Census_merged$Postal,
+                           Census_merged$Location,Census_merged$Neighbor,Census_merged$AE)
 
 ##Merge
 
+Maputo_merged_data <- merge(moz_shp,Census_merged, by="AES")
+rm(Census_merged,moz_shp)
 
+##Check the merge
 
-##Using the census data, I replicated the variable AES from the shp file.
-
-census_full$PROVINCIA<- sprintf("%02d",census_full$PROVINCIA)
-
-
-
-
-
-
-
-census_full$AES <-paste0(census_full$PROVINCIA,
-                        census_full$DISTRITO,
-                        census_full$POSTO,
-                        census_full$LOCALIDADE,
-                        census_full$BAIRRO,
-
-
-
-
-                        census_full$AE)
-length(unique(census_full$AES))
-
-
-
-##Contruct Variable
-
-moz_shp$ID <- paste(moz_shp$AES,moz_shp$AC,sep="-") ##67957 unique observations
-##length(unique(moz_shp$ID))
-
+unique(length(Maputo_merged_data$AES))
 
 
