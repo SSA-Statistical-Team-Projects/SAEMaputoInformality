@@ -18,16 +18,14 @@ library(dplyr)
 library(tidyverse)
 library (ggplot2)
 library(rgdal)
+library(fst)
 
 
 #Load The data
 
 
-##census_full <- readstata13::read.dta13("D:/AFR_Database/SSAPOV-Harmonization/Daylan/GMD/MOZ_Census/01.Input/MOZ Pop Census 2017 Full (selected vars).dta")
-
-
-##For the 10% work, see line 78
-census_10 <- readstata13::read.dta13("D:/AFR_Database/SSAPOV-Harmonization/Daylan/GMD/MOZ_Census/01.Input/MOZ Pop Census 2017_10 percent.dta")
+##Read in the 10% census data from the esapov.
+census_10 <- readstata13::read.dta13("//esapov/esapov/MOZ/GEO/Population/moz_census_10.dta")
 
 
 moz_shp <- sf::st_read(dsn = "//esapov/esapov/MOZ/GEO/Population/moz_censusshapefile2017",
@@ -197,6 +195,10 @@ moz_shp <- merge(census_10,moz_shp, by="ID")
 moz_shp <- st_as_sf(moz_shp, agr="constant",crs=3974 )
 
 
+
+
+
+
 ## 1720 unique observations at the bairro level for the shp.
 
 #1715 unique observations from the 10 census.
@@ -205,14 +207,13 @@ moz_shp <- st_as_sf(moz_shp, agr="constant",crs=3974 )
 
 
 
-plot(st_geometry(moz_shp))
 
+## None of these ones are currenlty working
+write_sf(moz_shp, "//esapov/esapov/MOZ/GEO/Population/Merged_shp/borrar")
 
+write_fst(moz_shp,"//esapov/esapov/MOZ/GEO/Population/Merged_shp/borrar")
 
-
-
-
-
+moz<- read_fst("//esapov/esapov/MOZ/GEO/Population/Merged_shp/Moz_merged_shp_10.fst")
 
 sf::st_write(obj = moz_shp, dsn = "//esapov/esapov/MOZ/GEO/Population/Merged_shp",
                                                           layer = "Moz_merged_shp_10",
