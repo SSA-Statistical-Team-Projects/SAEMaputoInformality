@@ -92,8 +92,6 @@ census_10$Cod_distrito<- as.character(census_10$Cod_distrito)
 census_10$Cod_AF_Distrito <- sprintf("%014.0f",census_10$Cod_AF_Distrito)
 census_10$AES<- paste0(census_10$Cod_distrito,census_10$Cod_AF_Distrito)
 
-
-
 #Alternative ID to merge with the shp file
 census_10$A2_PROVINCIA<- as.integer(census_10$A2_PROVINCIA)
 
@@ -144,11 +142,26 @@ moz_shp$CodBairro<- as.integer(moz_shp$CodBairro)
 
 ##Know what distric code corresponds to what distric name
 moz_shp<- as.data.table(moz_shp)
+test<-unique(moz_shp[,c("CodDist", "Distrito")])
 
 moz_shp[Distrito == "AEROPORTO INTERNACIONAL DE MAPUTO", CodDist := 24]
 
-test<-unique(moz_shp[,c("CodDist", "Distrito")])
+##Since Maputo is only a distric without a code for teh rest of sub divitions, I
+##used the same system they used with different similar districs.
+
+moz_shp[Distrito == "AEROPORTO INTERNACIONAL DE MAPUTO", CodPost := 99]
+moz_shp[Distrito == "AEROPORTO INTERNACIONAL DE MAPUTO", Posto := "Nao Aplicavel"]
+moz_shp[Distrito == "AEROPORTO INTERNACIONAL DE MAPUTO", CodBairro := 99]
+moz_shp[Distrito == "AEROPORTO INTERNACIONAL DE MAPUTO", Bairro := "Nao Aplicavel"]
+moz_shp[Distrito == "AEROPORTO INTERNACIONAL DE MAPUTO", CodLocal := 99]
+moz_shp[Distrito == "AEROPORTO INTERNACIONAL DE MAPUTO", Localidade := "Nao Aplicavel"]
+
+test<-unique(moz_shp[,c("CodPost", "Posto", "CodDist", "Provincia", "CodBairro", "Bairro", "CodLocal", "Localidade","Distrito")]) ##we have two observations as NA
+
+
 rm(test)
+
+
 
 new_vars<-apply(moz_shp[,c("CodProv","CodDist","CodPost","CodLocal",
                              "CodBairro")],
@@ -173,24 +186,16 @@ length(unique(moz_shp$ID))
 
 
 ####Create a shpfile at the barrio level
-moz_shp <- st_as_sf(moz_shp, agr="constant" )
+moz_shp<- as.data.table(moz_shp)
 
 moz_shp<-moz_shp %>%
           group_by(ID) %>%
           summarize()
 
-
-
-
 moz_shp1<- moz_shp
-
-
-
-
 ## Merge the data
-
-
 moz_shp <- merge(census_10,moz_shp, by="ID")
+
 
 moz_shp <- st_as_sf(moz_shp, agr="constant",crs=3974 )
 
