@@ -46,7 +46,51 @@ rm(crs_dt)
 ad_zero02<- function(X){
   return(sprintf("%03d",X))
 }
+##Work on the 10% census
 
+##Unique ID creation. This ID does not match the shp file.
+census_10$Cod_distrito<- as.character(census_10$Cod_distrito)
+census_10$Cod_AF_Distrito <- sprintf("%014.0f",census_10$Cod_AF_Distrito)
+census_10$AES<- paste0(census_10$Cod_distrito,census_10$Cod_AF_Distrito)
+
+#Alternative ID to merge with the shp file
+census_10$A2_PROVINCIA<- as.integer(census_10$A2_PROVINCIA)
+
+new_vars<-apply(census_10[,c("A2_PROVINCIA","A3_DISTRITO","POSTO","LOCALIDADE",
+                             "BAIRRO")],
+                MARGIN = 2,FUN = ad_zero02)
+
+test<-unique(census_10[,c("A3_DISTRITO", "Cod_distrito")])
+
+
+unique (unlist(lapply(census_10[,c("A2_PROVINCIA","A3_DISTRITO","POSTO","LOCALIDADE",
+                                   "BAIRRO")], function(x) which (is.na(x)))))
+
+
+new_vars<- as.data.frame(new_vars)
+
+##Now we change the name of the columns
+
+
+colnames(new_vars)<- c('Province',"District","Postal", "Location","Neighbor")
+
+
+##Merge our our new col with the census.
+
+
+census_10 <- cbind(new_vars,census_10)
+rm(new_vars)
+
+census_10$ID<- paste0(census_10$Province,census_10$District,census_10$Postal,
+                      census_10$Location,census_10$Neighbor)
+
+length(unique(census_10$ID))
+
+##Subsetthe census
+census_10<- as.data.table(census_10)
+census_10<-census_10[,.(ID,TIPO_DE_TRABALHADOR,HP31,NIVEL_DE_ENSINO_FREQUENTADO,P24_NIVEL_DE_ENSINO_CONCLUIDO_1,
+                        CURSO_SUPERIOR_CONCLUIDOX,CURSO_SUPERIOR_CONCLUIDO,TRABALHOU_NA_ULTIMA_SEMANA_JULHO,
+                        PORQUE_NAO_TRABALHOU,TRABALHO_DOMESTICO,HORAS_TRABALHADAS_ULTIMA_SEMANA)]
 #
 # ##Apply the funtion to each variable in census_full
 #
@@ -87,47 +131,9 @@ ad_zero02<- function(X){
 
 ##Work on the 10% census
 
-##Unique ID creation. This ID does not match the shp file.
-census_10$Cod_distrito<- as.character(census_10$Cod_distrito)
-census_10$Cod_AF_Distrito <- sprintf("%014.0f",census_10$Cod_AF_Distrito)
-census_10$AES<- paste0(census_10$Cod_distrito,census_10$Cod_AF_Distrito)
-
-#Alternative ID to merge with the shp file
-census_10$A2_PROVINCIA<- as.integer(census_10$A2_PROVINCIA)
-
-new_vars<-apply(census_10[,c("A2_PROVINCIA","A3_DISTRITO","POSTO","LOCALIDADE",
-                               "BAIRRO")],
-                MARGIN = 2,FUN = ad_zero02)
-
-
-new_vars<- as.data.frame(new_vars)
-
-##Now we change the name of the columns
-
-
-colnames(new_vars)<- c('Province',"District","Postal", "Location","Neighbor")
-
-
-##Merge our our new col with the census.
-
-
-census_10 <- cbind(new_vars,census_10)
-rm(new_vars)
-
-census_10$ID<- paste0(census_10$Province,census_10$District,census_10$Postal,
-                      census_10$Location,census_10$Neighbor)
-
-length(unique(census_10$ID))
-
-##Subsetthe census
-census_10<- as.data.table(census_10)
-census_10<-census_10[,.(ID,TIPO_DE_TRABALHADOR,HP31,NIVEL_DE_ENSINO_FREQUENTADO,P24_NIVEL_DE_ENSINO_CONCLUIDO_1,
-                        CURSO_SUPERIOR_CONCLUIDOX,CURSO_SUPERIOR_CONCLUIDO,TRABALHOU_NA_ULTIMA_SEMANA_JULHO,
-                        PORQUE_NAO_TRABALHOU,TRABALHO_DOMESTICO,HORAS_TRABALHADAS_ULTIMA_SEMANA)]
-
-
-
-
+#-------------------------------------------------------------------------------
+#-----------------WORK ON THE SHP FILE NOW--------------------------------------
+#-------------------------------------------------------------------------------
 
 ##Create the same ID on the shp file
 moz_shp$CodProv<- as.integer(moz_shp$CodProv)
@@ -156,7 +162,13 @@ moz_shp[Distrito == "AEROPORTO INTERNACIONAL DE MAPUTO", Bairro := "Nao Aplicave
 moz_shp[Distrito == "AEROPORTO INTERNACIONAL DE MAPUTO", CodLocal := 99]
 moz_shp[Distrito == "AEROPORTO INTERNACIONAL DE MAPUTO", Localidade := "Nao Aplicavel"]
 
-test<-unique(moz_shp[,c("CodPost", "Posto", "CodDist", "Provincia", "CodBairro", "Bairro", "CodLocal", "Localidade","Distrito")]) ##we have two observations as NA
+test<-unique(moz_shp[,c("CodPost", "Posto", "CodDist", "Provincia", "CodBairro", "Bairro", "CodLocal", "Localidade","Distrito", )]) ##we have two observations as NA
+
+
+unique (unlist(lapply(moz_shp[,c("CodPost", "Posto", "CodDist", "Provincia",
+                                  "CodBairro", "Bairro", "CodLocal", "Localidade",
+                                  "Distrito")],
+                       function(x) which (is.na(x)))))
 
 
 rm(test)
@@ -170,7 +182,8 @@ new_vars<-apply(moz_shp[,c("CodProv","CodDist","CodPost","CodLocal",
 
 new_vars<- as.data.frame(new_vars)
 
-##Now we change the name of the columns
+##Now we change the name of the columns so they don't have the same name as the
+##old variables in the shp file
 
 colnames(new_vars)<- c('Province',"District","Postal", "Location","Neighbor")
 
@@ -178,26 +191,26 @@ colnames(new_vars)<- c('Province',"District","Postal", "Location","Neighbor")
 moz_shp1 <- cbind(new_vars,moz_shp)
 rm(new_vars)
 
-moz_shp$ID<- paste0(moz_shp1$Province,moz_shp1$District,moz_shp1$Postal,
-                    moz_shp1$Location,moz_shp1$Neighbor)
-rm(moz_shp1)
 
-length(unique(moz_shp$ID))
+moz_shp1$ID<- paste0(moz_shp1$Province,moz_shp1$District,moz_shp1$Postal,
+                    moz_shp1$Location,moz_shp1$Neighbor)
+
+length(unique(moz_shp1$ID))
 
 
 ####Create a shpfile at the barrio level
-moz_shp<- as.data.table(moz_shp)
+moz_shp1<- as.data.table(moz_shp1)
 
-moz_shp<-moz_shp %>%
+moz_shp1<-moz_shp %>%
           group_by(ID) %>%
           summarize()
 
-moz_shp1<- moz_shp
+
 ## Merge the data
-moz_shp <- merge(census_10,moz_shp, by="ID")
+moz_shp1 <- merge(census_10,moz_shp1, by="ID")
 
 
-moz_shp <- st_as_sf(moz_shp, agr="constant",crs=3974 )
+moz_shp1 <- st_as_sf(moz_shp, agr="constant",crs=3974 )
 
 
 
