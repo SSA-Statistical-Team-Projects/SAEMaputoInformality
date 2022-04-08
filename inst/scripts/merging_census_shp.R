@@ -1,240 +1,107 @@
-#This script is for merging census data and the shapefile.
+### a script for merging the 10% census data with the shapefile
 
-#1. Loading census data which are .dta file
-#--> use the readstata13 package, there is a function calledread.dta or something like that.
-#2. Loading shapefile
-#--> First off, if you go into the MOZmap project repo, in the branch titled ifybranch, you will see a script called MOZ_datapull_final. Line 24 shows you how to read in the shapefile. When you load it you will notice, 80000+ observations, those are the all the areas or villages (not sure which one). Perhaps you can find out by doing some a bit of exploratory work
+if (Sys.info()[["user"]] == "wb570371"){
 
+  .libPaths("E:/Daylan/R")
 
-
-
-#1. Loading census data which are .dta file
-#library(haven)
-.libPaths("E:/Daylan/R")
-library(sf)
-library(readstata13)
-library(data.table)
-library(dplyr)
-library(tidyverse)
-library (ggplot2)
-library(rgdal)
-library(fst)
-
-
-#Load The data
-
-
-##Read in the 10% census data from the esapov.
-census_10 <- readstata13::read.dta13("//esapov/esapov/MOZ/GEO/Population/moz_census_10.dta")
-
-
-moz_shp <- sf::st_read(dsn = "//esapov/esapov/MOZ/GEO/Population/moz_censusshapefile2017",
-                       layer = "BASE_COMPLETA_DE_AE_CENSO_2017")
-
-crs_dt<- rgdal::make_EPSG()
-moz_shp<- st_transform(moz_shp, crs_dt$prj4[crs_dt$code==3974])
-rm(crs_dt)
-
-
-# census_full$PROVINCIA<- as.integer(census_full$PROVINCIA)
-
-##Keep only the relevant variables from the census_full. (ie. Labour informality and identifiers)
-
-
-##This function adds a leading zero for variables with 2 9similar to the variables in moz_shp
-
-ad_zero02<- function(X){
-  return(sprintf("%03d",X))
 }
-##Work on the 10% census
 
-##Unique ID creation. This ID does not match the shp file.
-census_10$Cod_distrito<- as.character(census_10$Cod_distrito)
-census_10$Cod_AF_Distrito <- sprintf("%014.0f",census_10$Cod_AF_Distrito)
-census_10$AES<- paste0(census_10$Cod_distrito,census_10$Cod_AF_Distrito)
+packages <- c("sf", "data.table", "fst", "stringi", "tidyverse")
 
-#Alternative ID to merge with the shp file
-census_10$A2_PROVINCIA<- as.integer(census_10$A2_PROVINCIA)
+# Install packages not yet installed
+installed_packages <- packages %in% rownames(installed.packages())
+if (any(installed_packages == FALSE)) {
+  install.packages(packages[!installed_packages])
+}
 
-new_vars<-apply(census_10[,c("A2_PROVINCIA","A3_DISTRITO","POSTO","LOCALIDADE",
-                             "BAIRRO")],
-                MARGIN = 2,FUN = ad_zero02)
+# Packages loading
+invisible(lapply(packages, library, character.only = TRUE))
 
-test<-unique(census_10[,c("A3_DISTRITO", "Cod_distrito")])
 
 
-unique (unlist(lapply(census_10[,c("A2_PROVINCIA","A3_DISTRITO","POSTO","LOCALIDADE",
-                                   "BAIRRO")], function(x) which (is.na(x)))))
+minicensus_dt <- read_fst(path = "//esapov/esapov/MOZ/GEO/Population/tenpercent_census.fst",
+                          as.data.table = TRUE)
 
 
-new_vars<- as.data.frame(new_vars)
+## reading in the shapefile
+shp_dt <- sf::st_read(dsn = "//esapov/esapov/MOZ/GEO/Population/moz_censusshapefile2017",
+                      layer = "BASE_COMPLETA_DE_AE_CENSO_2017")
+shp_dt <- as.data.table(shp_dt)
 
-##Now we change the name of the columns
+## perform a merge based on province, district, postal code, localidade,bairro/neighborhood
 
+### a quick function that might be useful for string cleaning of the area names
+keep_lettersonly <- function(X){
 
-colnames(new_vars)<- c('Province',"District","Postal", "Location","Neighbor")
+  y <- stri_trans_general(X, "Latin-ASCII") ##remove all accents
+  y <- tolower(y)  ##make sure all characters are lower case
+  y <- gsub(" ", "", y) ##remove all spaces
+  y <- gsub("[[:punct:]]", "", y) ##remove random text
 
+  return(y)
+}
 
-##Merge our our new col with the census.
+### create matching province codes from the shapefile
+add_dt <- unique(shp_dt[,c("CodProv", "Provincia")])
+minicensus_dt[,CodProv := as.integer(A2_PROVINCIA)]
+minicensus_dt[,CodProv := sprintf("%02d", CodProv)]
 
+add_dt[minicensus_dt, on = "CodProv"] ##test to see if the merge works and it does
 
-census_10 <- cbind(new_vars,census_10)
-rm(new_vars)
+### create matching district codes with shapefile
+add_dt <- unique(shp_dt[,c("CodProv", "CodDist")])
+minicensus_dt[,CodDist := sprintf("%02d", A3_DISTRITO)]
 
-census_10$ID<- paste0(census_10$Province,census_10$District,census_10$Postal,
-                      census_10$Location,census_10$Neighbor)
+add_dt[minicensus_dt, on = c("CodProv", "CodDist")] ##test to see if the merge works and it does
 
-length(unique(census_10$ID))
+### create matching postal codes with the shapefile
+add_dt <- unique(shp_dt[,c("CodProv", "CodDist", "CodPost")])
+minicensus_dt[,CodPost := sprintf("%02d", POSTO)]
 
-##Subsetthe census
-census_10<- as.data.table(census_10)
-census_10<-census_10[,.(ID,TIPO_DE_TRABALHADOR,HP31,NIVEL_DE_ENSINO_FREQUENTADO,P24_NIVEL_DE_ENSINO_CONCLUIDO_1,
-                        CURSO_SUPERIOR_CONCLUIDOX,CURSO_SUPERIOR_CONCLUIDO,TRABALHOU_NA_ULTIMA_SEMANA_JULHO,
-                        PORQUE_NAO_TRABALHOU,TRABALHO_DOMESTICO,HORAS_TRABALHADAS_ULTIMA_SEMANA)]
-#
-# ##Apply the funtion to each variable in census_full
-#
-# new_vars<-apply(census_full[,c("PROVINCIA","DISTRITO","POSTO","LOCALIDADE",
-#                                    "BAIRRO")],
-#                 MARGIN = 2,FUN = ad_zero02)
-#
-# census_full$AE<-sprintf("%3d",census_full$AE)
-#
-# ##Since the Apply function returns a matrix, we convert it into a data frame
-#
-# new_vars<- as.data.frame(new_vars)
-#
-# ##Now we change the name of the columns
-#
-#
-# colnames(new_vars)<- c('Province',"District","Postal", "Location","Neighbor")
-#
-#
-# ##Merge our our new colums with the census.
-#
-# Census_merged <- cbind(new_vars,census_full)
-# rm(new_vars,census_full)
-#
-#
-# ##Create the AES variable to merge with the shp file.
-#
-# Census_merged$AES<- paste0(Census_merged$Province,Census_merged$District,Census_merged$Postal,
-#                            Census_merged$Location,Census_merged$Neighbor,Census_merged$AE)
-#
-# ##Merge
-#
-# Maputo_merged_data <- merge(moz_shp,Census_merged, by="AES")
-# rm(Census_merged,moz_shp)
-#
-#
-#
+add_dt[minicensus_dt, on = c("CodProv", "CodDist", "CodPost")] ##test to see if the merge works and it does
 
-##Work on the 10% census
+### create a matching localidade codes with the shapefile
+add_dt <- unique(shp_dt[,c("CodProv", "CodDist", "CodPost", "CodLocal")])
+minicensus_dt[,CodLocal := sprintf("%02d", LOCALIDADE)]
 
-#-------------------------------------------------------------------------------
-#-----------------WORK ON THE SHP FILE NOW--------------------------------------
-#-------------------------------------------------------------------------------
+add_dt[minicensus_dt, on = c("CodProv", "CodDist", "CodPost", "CodLocal")] ##test to see if the merge works and it does
 
-##Create the same ID on the shp file
-moz_shp$CodProv<- as.integer(moz_shp$CodProv)
-moz_shp$CodDist<- as.integer(moz_shp$CodDist)
-moz_shp$CodPost<- as.integer(moz_shp$CodPost)
-moz_shp$CodLocal<- as.integer(moz_shp$CodLocal)
-moz_shp$CodBairro<- as.integer(moz_shp$CodBairro)
+### create a matching neighborhood (bairro) code with the shapefile
+add_dt <- unique(shp_dt[,c("CodProv", "CodDist", "CodPost", "CodLocal", "CodBairro")])
+minicensus_dt[,CodBairro := sprintf("%02d", BAIRRO)]
 
+### merge shapefile with cenus at bairro level
+merge_ids <- c("CodProv", "CodDist", "CodPost", "CodLocal", "CodBairro")
 
+shp_dt <- st_as_sf(shp_dt, crs = 4326, agr = "constant")
 
+sf_use_s2(FALSE)
+union_shp <- shp_dt %>%
+    group_by(CodProv, Provincia, CodDist, Distrito, CodPost, Posto, CodLocal, Localidade, CodBairro, Bairro) %>%
+    summarize()
 
+write_sf(union_shp,
+         dsn = "//esapov/esapov/MOZ/GEO/Population",
+         layer = "neighborhood_shp",
+         driver = "ESRI Shapefile",
+         append = FALSE)
 
-##Know what distric code corresponds to what distric name
-moz_shp<- as.data.table(moz_shp)
-test<-unique(moz_shp[,c("CodDist", "Distrito")])
+## create matching household ID
+minicensus_dt[,hhid := paste0(as.character(Cod_distrito),
+                              as.character(Cod_AF_Distrito))]
 
-moz_shp[Distrito == "AEROPORTO INTERNACIONAL DE MAPUTO", CodDist := 24]
+minicensus_dt[,pid := 1:.N, by = "hhid"]
+minicensus_dt[,pid := sprintf("%02d", pid)]
 
-##Since Maputo is only a distric without a code for teh rest of sub divitions, I
-##used the same system they used with different similar districs.
+minicensus_dt[,pid := paste0(hhid, pid)]
 
-moz_shp[Distrito == "AEROPORTO INTERNACIONAL DE MAPUTO", CodPost := 99]
-moz_shp[Distrito == "AEROPORTO INTERNACIONAL DE MAPUTO", Posto := "Nao Aplicavel"]
-moz_shp[Distrito == "AEROPORTO INTERNACIONAL DE MAPUTO", CodBairro := 99]
-moz_shp[Distrito == "AEROPORTO INTERNACIONAL DE MAPUTO", Bairro := "Nao Aplicavel"]
-moz_shp[Distrito == "AEROPORTO INTERNACIONAL DE MAPUTO", CodLocal := 99]
-moz_shp[Distrito == "AEROPORTO INTERNACIONAL DE MAPUTO", Localidade := "Nao Aplicavel"]
+minicensus_dt <- write_fst(minicensus_dt,
+                           path = "//esapov/esapov/MOZ/GEO/Population/tenpercent_cleancensus.fst")
 
-test<-unique(moz_shp[,c("CodPost", "Posto", "CodDist", "Provincia", "CodBairro", "Bairro", "CodLocal", "Localidade","Distrito", )]) ##we have two observations as NA
 
 
-unique (unlist(lapply(moz_shp[,c("CodPost", "Posto", "CodDist", "Provincia",
-                                  "CodBairro", "Bairro", "CodLocal", "Localidade",
-                                  "Distrito")],
-                       function(x) which (is.na(x)))))
 
 
-rm(test)
 
-
-
-new_vars<-apply(moz_shp[,c("CodProv","CodDist","CodPost","CodLocal",
-                             "CodBairro")],
-                MARGIN = 2,FUN = ad_zero02)
-
-
-new_vars<- as.data.frame(new_vars)
-
-##Now we change the name of the columns so they don't have the same name as the
-##old variables in the shp file
-
-colnames(new_vars)<- c('Province',"District","Postal", "Location","Neighbor")
-
-
-moz_shp1 <- cbind(new_vars,moz_shp)
-rm(new_vars)
-
-
-moz_shp1$ID<- paste0(moz_shp1$Province,moz_shp1$District,moz_shp1$Postal,
-                    moz_shp1$Location,moz_shp1$Neighbor)
-
-length(unique(moz_shp1$ID))
-
-
-####Create a shpfile at the barrio level
-moz_shp1<- as.data.table(moz_shp1)
-
-moz_shp1<-moz_shp %>%
-          group_by(ID) %>%
-          summarize()
-
-
-## Merge the data
-moz_shp1 <- merge(census_10,moz_shp1, by="ID")
-
-
-moz_shp1 <- st_as_sf(moz_shp, agr="constant",crs=3974 )
-
-
-
-
-
-
-## 1720 unique observations at the bairro level for the shp.
-
-#1715 unique observations from the 10 census.
-
-## 1705 unique observations on the merged shp
-
-
-
-
-## None of these ones are currenlty working
-write_sf(moz_shp, "//esapov/esapov/MOZ/GEO/Population/Merged_shp/borrar")
-
-write_fst(moz_shp,"//esapov/esapov/MOZ/GEO/Population/Merged_shp/borrar")
-
-moz<- read_fst("//esapov/esapov/MOZ/GEO/Population/Merged_shp/Moz_merged_shp_10.fst")
-
-sf::st_write(obj = moz_shp, dsn = "//esapov/esapov/MOZ/GEO/Population/Merged_shp",
-                                                          layer = "Moz_merged_shp_10",
-                                                          driver = "ESRI Shapefile", append = FALSE)
 
 
