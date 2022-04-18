@@ -1,5 +1,15 @@
-library(data.table)
-library(tidyverse)
+
+packages(c("data.table", "tidyverse"))
+
+# Install packages not yet installed
+installed_packages <- packages %in% rownames(installed.packages())
+if (any(installed_packages == FALSE)) {
+  install.packages(packages[!installed_packages])
+}
+
+# Packages loading
+invisible(lapply(packages, library, character.only = TRUE))
+
 ### read in the shapefile for MOZ
 sf::sf_use_s2(FALSE)
 shp_dt <- sf::st_read(dsn = "//esapov/esapov/MOZ/GEO/Population/moz_censusshapefile2017",

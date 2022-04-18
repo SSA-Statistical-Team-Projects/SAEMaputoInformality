@@ -6,13 +6,19 @@ if (Sys.info()[["user"]] == "wb570371"){
   .libPaths("E:/Daylan/R")
 
 }
-library(sf)
-library(fst)
-library(tidyverse)
-library(dplyr)
-library(data.table)
-library(tmap)
-library(leaflet)
+
+packages <- c("sf", "fst", "tidyverse", "dplyr",
+              "data.table", "tmap", "leaflet")
+
+# Install packages not yet installed
+installed_packages <- packages %in% rownames(installed.packages())
+if (any(installed_packages == FALSE)) {
+  install.packages(packages[!installed_packages])
+}
+
+# Packages loading
+invisible(lapply(packages, library, character.only = TRUE))
+
 sf_use_s2(FALSE)
 
 ##load moz grid file and the cellphone tower data
