@@ -13,6 +13,8 @@ library(tidyverse)
 library(dplyr)
 library(data.table)
 library(tmap)
+library(maps)
+library(mapproj)
 library(leaflet)
 sf_use_s2(FALSE)
 
@@ -74,6 +76,30 @@ tmap::tmap_mode(mode=c("plot","view"))+
     tmap::tm_shape(emp_dt)+
   tmap::tm_symbols(col = "red", border.col = "white",  size = "wage_emp_share")
 
+  #Share of self-employment map
+  self_emp_share<- tmap::tmap_mode("view")+
+    tmap::tm_shape(emp_dt) +
+    tmap::tm_fill("self_emp_share",palette="Greens",
+                  title="Share of self employment",
+                  id="Bairro",
+                  popup.vars=c("Name"="Bairro", "Share"="self_emp_share"))+
+    tmap::tm_borders()
+  tmap_save(self_emp_share, "self_emp_share.html")
+  rm(self_emp_share)
+
+  #Share of wage-employment map
+  wage_emp_share<- tmap::tmap_mode("view")+
+    tmap::tm_shape(emp_dt) +
+    tmap::tm_fill("wage_emp_share",
+                  title="Share of wage employment",palette="Blues",
+                  id="Bairro",
+                  popup.vars=c("Name"="Bairro", "Share"="wage_emp_share"))+
+    tmap::tm_borders()
+  tmap_save(wage_emp_share, "wage_emp_share.html")
+  rm(wage_emp_share)
+
+
+tm_layout()
 
 #Share of self/wage employment maps side by side
 tmap::tmap_mode("view")+
@@ -98,6 +124,24 @@ tmap::tmap_mode(mode=c("plot"))+
     tm_basemap(server = 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', group ="Stadia.AlidadeSmoothDark", alpha = NA, tms = FALSE)+
     tm_tiles('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', group ="Stadia.AlidadeSmoothDark", alpha = 1, zindex = NA, tms = FALSE)+
     tm_bubbles(size = "Tower_per_sqkm", col = "red")
+
+
+
+
+  ### Experimenting with tmaps
+  tmap::tmap_mode(mode=c("view"))+
+    tmap::tm_style("cobalt")
+  tmap::tm_shape(emp_dt)+
+    tmap::tm_polygons()+
+    tmap::tm_dots( size = "self_emp_share", col="blue")+
+    tmap::tm_shape(emp_dt)+
+    tmap::tm_dots( size = "wage_emp_share", col="red")
+
+
+
+
+
+
 
 
 
