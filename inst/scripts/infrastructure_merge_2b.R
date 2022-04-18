@@ -17,7 +17,7 @@ load_packages(packages)
 
 sf_use_s2(FALSE)
 
-##load moz grid file and the cellphone tower data
+#Load MOZ grid file and the cellphone tower data
 
 moz_grid<- sf::st_read(dsn = "//esapov/esapov/MOZ/GEO/Population/poppoly",
                        layer = "moz_poppoly_gridded") ##Grid with only 2 vars
@@ -35,58 +35,49 @@ moz_full_grid<- moz_full_grid[, c("poly_id","CodProv", "Provincia", "CodDist", "
 bairro_dt<- sf::st_read(dsn = "//esapov/esapov/MOZ/GEO/Population",
                         layer = "neighborhood") ##read in the neighhorhood shapefile
 
-CellTower_DT<- fread(file= "//esapov/esapov/ALL/Energy/cell_towers_2022-04-10-T000000.csv")
-CellTower_DT<- as.data.frame(CellTower_DT)## Convert to data frame for the st_as_sf.
+cell_tower_dt<- fread(file= "//esapov/esapov/ALL/Energy/cell_towers_2022-04-10-T000000.csv")
+cell_tower_dt<- as.data.frame(cell_tower_dt)## Convert to data frame for the st_as_sf.
 
 
-#Convert the CellTower_DT data to an sf object.
-CellTower_DT<- st_as_sf(CellTower_DT, coords = c("lon","lat"), crs = 4326)
+#Convert the cell_tower_dt data to an sf object.
+cell_tower_dt<- st_as_sf(cell_tower_dt, coords = c("lon","lat"), crs = 4326)
 
 #merge the grid to the cellphone tower data
-CellTower_DT<- st_join(moz_grid, CellTower_DT) #merging the data
+cell_tower_dt<- st_join(moz_grid, cell_tower_dt) #merging the data
 
-saveRDS(CellTower_DT,"//esapov/esapov/MOZ/GEO/Energy/temp/Joint_data_cell_temp.rds" )
-
-
-
+#saveRDS(cell_tower_dt,"//esapov/esapov/MOZ/GEO/Energy/temp/Joint_data_cell_temp.rds" )
 
 #Convert to data table, create ID .
-CellTower_DT <- as.data.table(CellTower_DT)
-CellTower_DT$tower_ID <- seq_along(CellTower_DT[, 1])##Create a tower ID with a value of 1
+cell_tower_dt <- as.data.table(cell_tower_dt)
+cell_tower_dt$tower_ID <- seq_along(cell_tower_dt[, 1])##Create a tower ID with a value of 1
 
 
 
 #Group by Poly ID and count the amount of towers per grid.
-#CellTower_DT<-setDT(CellTower_DT[,lapply(.SD, sum), by = poly_id, .SDcols = "tower_count"])
-
-CellTower_DT[,cellphonecount := length(tower_ID), by=poly_id]# Creates a variable with the
+cell_tower_dt[,cellphonecount := length(tower_ID), by=poly_id]# Creates a variable with the
 #amount of towers per polygon.
 
 ##Merge the cellphone tower data with the full grid to get the geo identifiers.
 ##Get the mean of the cell phone count per kilometer in each neighborhood.
-CellTower_DT<-  merge(CellTower_DT, moz_full_grid, by = "poly_id")
-CellTower_DT<- CellTower_DT[, mean(cellphonecount), by = c("CodProv", "CodDist", "CodPost",
+cell_tower_dt<-  merge(cell_tower_dt, moz_full_grid, by = "poly_id")
+cell_tower_dt<- cell_tower_dt[, mean(cellphonecount), by = c("CodProv", "CodDist", "CodPost",
                                                            "CodLocal", "CodBairro")]
-
-
-##Merge Bairro_dt into the CellTower_DT and name it bairro_dt
+##Merge Bairro_dt into the cell_tower_dt and name it bairro_dt
 bairro_dt<- as.data.table(bairro_dt)
-bairro_dt<- CellTower_DT[bairro_dt, on = c("CodProv", "CodDist", "CodPost", "CodLocal",
+bairro_dt<- cell_tower_dt[bairro_dt, on = c("CodProv", "CodDist", "CodPost", "CodLocal",
                                            "CodBairro")]
 # bairro_dt<- st_as_sf(bairro_dt, crs = 4326, agr = "constant")
-#
-#
-#
+
 # #Rename V1 to Tower_per_sqkm
 # bairro_dt<- as.data.frame(bairro_dt)
 bairro_dt<- dplyr::rename(bairro_dt, Tower_per_sqkm = V1)# Rename the variable V1
 bairro_dt<- st_as_sf(bairro_dt, crs = 4326, agr = "constant")
 
 #Clean the environment
-rm(CellTower_DT,moz_grid)
+rm(cell_tower_dt,moz_grid)
 
 ################################################################################
-######################MERGE THE BUILDING DATA###################################
+##################### MERGE THE BUILDING DATA ##################################
 ################################################################################
 
 
@@ -97,15 +88,8 @@ building_dt <- read.fst("//esapov/esapov/MOZ/GEO/BuildingFootprints/grid_bldstat
 building_dt<- merge(building_dt, moz_full_grid, by = "poly_id")
 
 
-
-
-################################################################################
-#Wouldn't erasing 0 population from the moz_shp grid risks that we are erasing
-# areas from the census that do have people in it?
-################################################################################
-
 #Erase away population 0.
-#temp_dt<- temp_td[!(temp_td$population==0),]
+building_dt<- building_dt[!(building_dt$population==0),]
 
 
 ## Get the mean building data in each neighbourhood
