@@ -7,15 +7,10 @@ if (Sys.info()[["user"]] == "wb570371"){
 
   .libPaths("E:/Daylan/R")
 }
-library(sf)
-library(fst)
-library(tidyverse)
-library(dplyr)
-library(data.table)
-library(tmap)
-library(maps)
-library(mapproj)
-library(leaflet)
+
+
+load_packages(c("sf", "fst", "tidyverse", "dplyr", "data.table", "tmap", "maps", "mapproj", "leaflet"))
+
 sf_use_s2(FALSE)
 
 ################################################################################
@@ -29,7 +24,8 @@ tenpercent_dt<- read.fst("//esapov/esapov/MOZ/GEO/Population/tenpercent_cleancen
                                      "TRABALHO_DOMESTICO","TRABALHOU_NA_ULTIMA_SEMANA_JULHO",
                                      "TIPO_DE_TRABALHADOR" , "HORAS_TRABALHADAS_ULTIMA_SEMANA"),
                          as.data.table=TRUE)
-bairro_dt<- readRDS("//esapov/esapov/MOZ/GEO/Population/Daylan/bairro.fst")
+
+bairro_dt <- readRDS("inst/extdata/bldstats_celltower_bairrolevel.RDS")
 
 tenpercent_dt$wage_emp<-0
 tenpercent_dt[TIPO_DE_TRABALHADOR %in% c(1,2,3,4,5,6,7,11), wage_emp:=1]
@@ -38,7 +34,7 @@ tenpercent_dt$self_emp<- 0
 tenpercent_dt[TIPO_DE_TRABALHADOR %in% c(9,10), self_emp:=1]
 tenpercent_dt$self_emp<- as.integer(tenpercent_dt$self_emp)
 tenpercent_dt$employed<- 0
-tenpercent_dt[TIPO_DE_TRABALHADOR %in% c(1:11), employed:=1]
+tenpercent_dt[TIPO_DE_TRABALHADOR %in% c(1:11, 99), employed := 1]
 tenpercent_dt$employed<- as.integer(tenpercent_dt$employed)
 
 
@@ -48,7 +44,8 @@ emp_dt<-setDT(tenpercent_dt[,lapply(.SD, sum),
                                by = c("CodProv", "CodDist", "CodPost", "CodLocal",
                                       "CodBairro"), .SDcols = c("wage_emp","self_emp","employed")])
 
-emp_dt<-emp_dt[bairro_dt, on = c("CodProv", "CodDist", "CodPost", "CodLocal", "CodBairro")]
+bairro_dt <- as.data.table(bairro_dt)
+emp_dt <- emp_dt[bairro_dt, on = c("CodProv", "CodDist", "CodPost", "CodLocal", "CodBairro")]
 
 
 
@@ -57,7 +54,7 @@ emp_dt<-emp_dt[bairro_dt, on = c("CodProv", "CodDist", "CodPost", "CodLocal", "C
 emp_dt$self_emp_share <-emp_dt$self_emp/emp_dt$employed
 emp_dt$wage_emp_share <-emp_dt$wage_emp/emp_dt$employed
 
-emp_dt<- st_as_sf(emp_dt)
+emp_dt<- st_as_sf(emp_dt, crs = 4326, agr = "constant")
 
 #Save the Employment file as an RDS in temporary folder
 saveRDS(emp_dt,"//esapov/esapov/MOZ/GEO/Population/Daylan/emp.rds")
