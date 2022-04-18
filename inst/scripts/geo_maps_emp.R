@@ -9,7 +9,10 @@ if (Sys.info()[["user"]] == "wb570371"){
 }
 
 
-load_packages(c("sf", "fst", "tidyverse", "dplyr", "data.table", "tmap", "maps", "mapproj", "leaflet"))
+packages <- c("sf", "fst", "tidyverse", "dplyr",
+              "data.table", "tmap", "leaflet")
+devtools::load_all()
+load_packages(packages)
 
 sf_use_s2(FALSE)
 
@@ -56,29 +59,19 @@ emp_dt$wage_emp_share <-emp_dt$wage_emp/emp_dt$employed
 
 emp_dt<- st_as_sf(emp_dt, crs = 4326, agr = "constant")
 
-#Save the Employment file as an RDS in temporary folder
-saveRDS(emp_dt,"//esapov/esapov/MOZ/GEO/Population/Daylan/emp.rds")
-
-
 
 ##Plot the Geo-spatial maps
+#See palettes avaiable
+display.brewer.all()
+display.brewer.all(colorblindFriendly = TRUE)
 
-
-# Share of self and wage employment
-tmap::tmap_mode(mode=c("plot","view"))+
-  tmap::tm_style("cobalt")
-  tmap::tm_shape(emp_dt)+
-  tmap::tm_polygons()+
-  tmap::tm_symbols(col = "blue", border.col = "white", size = "self_emp_share")+
-    tmap::tm_shape(emp_dt)+
-  tmap::tm_symbols(col = "red", border.col = "white",  size = "wage_emp_share")
 
   #Share of self-employment map
   self_emp_share<- tmap::tmap_mode("view")+
     tmap::tm_shape(emp_dt) +
-    tmap::tm_fill("self_emp_share",palette="Greens",
-                  title="Share of self employment",
-                  id="Bairro",
+    tmap::tm_fill("self_emp_share",
+                  title="Share of self-employment",palette="-Spectral",
+                  id="Bairro", breaks = c(0,0.1,0.2,0.3,0.4,0.5,0.7,0.8,0.9,1.0),
                   popup.vars=c("Name"="Bairro", "Share"="self_emp_share"))+
     tmap::tm_borders()
   tmap_save(self_emp_share, "self_emp_share.html")
@@ -88,15 +81,15 @@ tmap::tmap_mode(mode=c("plot","view"))+
   wage_emp_share<- tmap::tmap_mode("view")+
     tmap::tm_shape(emp_dt) +
     tmap::tm_fill("wage_emp_share",
-                  title="Share of wage employment",palette="Blues",
-                  id="Bairro",
+                  title="Share of wage employment",palette="-Spectral",
+                  id="Bairro", breaks = c(0,0.1,0.2,0.3,0.4,0.5,0.7,0.8,0.9,1.0),
                   popup.vars=c("Name"="Bairro", "Share"="wage_emp_share"))+
     tmap::tm_borders()
   tmap_save(wage_emp_share, "wage_emp_share.html")
   rm(wage_emp_share)
 
 
-tm_layout()
+
 
 #Share of self/wage employment maps side by side
 tmap::tmap_mode("view")+
@@ -105,34 +98,15 @@ tmap::tm_shape(emp_dt) +
   tmap::tm_polygons(c("self_emp_share","wage_emp_share"))
 
 
-#Cell phone towers per sqkm in each neighborhood.
-tmap::tmap_mode(mode=c("plot"))+
-  tmap::tm_shape(emp_dt)+
-  tmap::tm_style("col_blind")+
-  tmap::tm_polygons()+
-  tm_bubbles(size = "Tower_per_sqkm", col = "red")
-
-
 
 ##Cell phone towers per sqkm in each neighborhood.
-  tmap::tmap_mode(mode=c("view"))+
-  tmap::tm_shape(emp_dt)+
-    tmap::tm_polygons()+
-    tm_basemap(server = 'https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', group ="Stadia.AlidadeSmoothDark", alpha = NA, tms = FALSE)+
-    tm_tiles('https://tiles.stadiamaps.com/tiles/alidade_smooth_dark/{z}/{x}/{y}{r}.png', group ="Stadia.AlidadeSmoothDark", alpha = 1, zindex = NA, tms = FALSE)+
-    tm_bubbles(size = "Tower_per_sqkm", col = "red")
-
-
-
-
-  ### Experimenting with tmaps
-  tmap::tmap_mode(mode=c("view"))+
-    tmap::tm_style("cobalt")
-  tmap::tm_shape(emp_dt)+
-    tmap::tm_polygons()+
-    tmap::tm_dots( size = "self_emp_share", col="blue")+
-    tmap::tm_shape(emp_dt)+
-    tmap::tm_dots( size = "wage_emp_share", col="red")
+tmap::tmap_mode("view")+
+  tmap::tm_shape(emp_dt) +
+  tmap::tm_borders()+
+  tmap::tm_bubbles("Tower_per_sqkm", col = "firebrick2",
+                   palette="-RdYlBu", contrast=1,
+                   title.size="Tower_per_sqkm",
+                   title.col="Cellphone towers per sqkm", id="Bairro")
 
 
 
