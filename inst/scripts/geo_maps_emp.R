@@ -25,11 +25,13 @@ sf_use_s2(FALSE)
 tenpercent_dt<- read.fst("//esapov/esapov/MOZ/GEO/Population/tenpercent_cleancensus.fst",
                          columns = c("CodProv", "CodDist", "CodPost", "CodLocal", "CodBairro",
                                      "TRABALHO_DOMESTICO","TRABALHOU_NA_ULTIMA_SEMANA_JULHO",
-                                     "TIPO_DE_TRABALHADOR" , "HORAS_TRABALHADAS_ULTIMA_SEMANA"),
+                                     "TIPO_DE_TRABALHADOR" , "HORAS_TRABALHADAS_ULTIMA_SEMANA", "URB_RUR"),
                          as.data.table=TRUE)
+tenpercent_dt$URB_RUR<- as.integer(tenpercent_dt$URB_RUR)
 
 bairro_dt <- readRDS("inst/extdata/bldstats_celltower_bairrolevel.RDS")
 
+## Generate the employment variables.
 tenpercent_dt$wage_emp<-0
 tenpercent_dt[TIPO_DE_TRABALHADOR %in% c(1,2,3,4,5,6,7,11), wage_emp:=1]
 tenpercent_dt$wage_emp<- as.integer(tenpercent_dt$wage_emp)
@@ -40,7 +42,10 @@ tenpercent_dt$employed<- 0
 tenpercent_dt[TIPO_DE_TRABALHADOR %in% c(1:11, 99), employed := 1]
 tenpercent_dt$employed<- as.integer(tenpercent_dt$employed)
 
-
+### Change the values from rural areas to 0.
+tenpercent_dt[URB_RUR %in% 2, wage_emp:=0]
+tenpercent_dt[URB_RUR %in% 2, self_emp:=0]
+tenpercent_dt[URB_RUR %in% 2, employed:=0]
 
 ##Get the employment columns at neighborhood level
 emp_dt<-setDT(tenpercent_dt[,lapply(.SD, sum),
@@ -53,11 +58,15 @@ emp_dt <- emp_dt[bairro_dt, on = c("CodProv", "CodDist", "CodPost", "CodLocal", 
 
 
 
-#Create the share of self employment and wage worker
+#Create the share of self employment and wage worker in urban areas
 emp_dt$self_emp_share <-emp_dt$self_emp/emp_dt$employed
 emp_dt$wage_emp_share <-emp_dt$wage_emp/emp_dt$employed
 
 emp_dt<- st_as_sf(emp_dt, crs = 4326, agr = "constant")
+
+##check tables
+table(emp_dt$Bairro,emp_dt$self_emp_share )
+table(emp_dt$Bairro,emp_dt$wage_emp_share )
 
 
 ##Plot the Geo-spatial maps
@@ -74,7 +83,7 @@ display.brewer.all(colorblindFriendly = TRUE)
                   id="Bairro", breaks = c(0,0.1,0.2,0.3,0.4,0.5,0.7,0.8,0.9,1.0),
                   popup.vars=c("Name"="Bairro", "Share"="self_emp_share"))+
     tmap::tm_borders()
-  tmap_save(self_emp_share, "self_emp_share.html")
+  tmap_save(self_emp_share, "urb_self_emp_share.html")
   rm(self_emp_share)
 
   #Share of wage-employment map
@@ -85,7 +94,7 @@ display.brewer.all(colorblindFriendly = TRUE)
                   id="Bairro", breaks = c(0,0.1,0.2,0.3,0.4,0.5,0.7,0.8,0.9,1.0),
                   popup.vars=c("Name"="Bairro", "Share"="wage_emp_share"))+
     tmap::tm_borders()
-  tmap_save(wage_emp_share, "wage_emp_share.html")
+  tmap_save(wage_emp_share, "urb_wage_emp_share.html")
   rm(wage_emp_share)
 
 
