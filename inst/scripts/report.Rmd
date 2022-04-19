@@ -1,0 +1,173 @@
+---
+title: "Geospatial Mapping of Urban Informality in Mozambique"
+author: "Ifeanyi Edochie"
+date: "4/18/2022"
+output: 
+  html_document:
+    toc : true
+    toc_depth : 5
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+##A script to estimate the relation between education and emptype
+##First Load Packages
+
+if (Sys.info()[["user"]] == "wb570371"){
+
+  .libPaths("E:/Daylan/R")
+
+}
+
+packages <- c("sf", "fst", "tidyverse", "dplyr", "readstata13", "data.table", "fstrings")
+
+# # Install packages not yet installed
+# installed_packages <- packages %in% rownames(installed.packages())
+# if (any(installed_packages == FALSE)) {
+#   install.packages(packages[!installed_packages])
+# }
+# 
+# # Packages loading
+# invisible(lapply(packages, library, character.only = TRUE))
+
+load_packages(packages)
+
+
+```
+
+## Paper Outline
+- Introduction 
+- Data and methodology 
+  a. Description of census data on informality 
+  b.	Predicting the informality status of wage workers 
+  c.	Description of census data on cell phone ownership, internet usage, and mobile money  
+  d.	Description of geospatial data on cell phone coverage  
+- Where in urban areas are there high shares of informal sector workers? 
+- How concentrated are informal workers in particular pockets of informality? 
+- To what extent do informal sector workers benefit from internet use, cell phone ownership, bank accounts, and mobile money? 
+- How is informality associated with lack of cell phone coverage? 
+- Conclusion  
+
+## Predicting the informality status of wage workers
+We use the Mozambique Household Budget Survey 2014/15 predict informality amongst wage workers. We define wage workers in the survey as informal if they are not enrolled in the national social security program. 
+
+```{r, echo = FALSE, include = FALSE}
+
+gmd14labor_dt <- as.data.table(read.dta13("D:/Ify/GitProjects/SAEMaputoInformality/inst/extdata/MOZ_2014_IOF_v01_M_v05_A_SSAPOV_L.dta"))
+gmd14ind_dt <- as.data.table(read.dta13("D:/Ify/GitProjects/SAEMaputoInformality/inst/extdata/MOZ_2014_IOF_v01_M_v05_A_SSAPOV_I.dta"))
+
+gmd14labor_dt[, wage_informal := ifelse(empstat == "1.Paid Employee" & socialsec == "1.Yes", 0, 
+                                 ifelse(empstat == "1.Paid Employee" & socialsec == "0.No", 1, NA))]
+
+gmdlabor_dt$wage_informal <- as.factor(gmdlabor_dt$wage_informal)
+
+### function to predict informality
+
+predict_wageinformality <- function(gmdlabor_dt,
+                                    gmdincome_dt,
+                                    xvars = c("ageyrs", "sex", "industrycat10", "educat4", "whours"),
+                                    yvar = "wage_informal"){
+  
+  gmdlabor_dt[, whours_total := whours_2 + whours]
+
+  gmdlabor_dt <- gmdincome_dt[,c("hid", "ageyrs", "pid", "sex", "educat4")][gmdlabor_dt, on = c("hid", "pid")]
+  gmdlabor_dt[, empstat := as.character(empstat)]
+  gmdlabor_dt[, socialsec := as.character(socialsec)]
+
+  
+
+  model <- formula("wage_informal ~ ageyrs + sex + industrycat10 + educat4 +  whours")
+
+  scaler <- function(x){
+  
+    average_x <- mean(x, na.rm = TRUE)
+  
+    y <- x / average_x
+  
+    return(y)
+  
+  }
+  gmdlabor_dt[,scaled_weights := scaler(wta_hh)]
+
+  ##build model with 90% of the sample
+  model_dt <- 
+    na.omit(gmdlabor_dt[is.na(wage_informal) == FALSE, c("wage_informal", "ageyrs", "sex",
+                                                           "industrycat10", "educat4", 
+                                                           "whours", "scaled_weights")])
+
+  train_dt <- model_dt[sample(1:nrow(model_dt), 0.9*nrow(model_dt)),]
+  test_dt <- model_dt[!sample(1:nrow(model_dt), 0.9*nrow(model_dt)),]
+
+  logit_model <- glm(model, 
+                     family = "binomial", 
+                     data = train_dt,
+                     weights = scaled_weights)
+
+
+  test_dt[,wage_informalpred := predict(logit_model, newdata = test_dt)]
+  test_dt[,wage_informalpred := ifelse(wage_informalpred > 0.5, 1, 0)]
+
+  test_dt[,prop.table(questionr::wtd.table(wage_informalpred, wage_informal, weights = scaled_weights), margin = 2)]
+
+  
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```
+
+
