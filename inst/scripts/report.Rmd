@@ -20,7 +20,7 @@ if (Sys.info()[["user"]] == "wb570371"){
 
 }
 
-packages <- c("sf", "fst", "tidyverse", "dplyr", "readstata13", "data.table", "fstrings")
+packages <- c("sf", "fst", "tidyverse", "dplyr", "readstata13", "data.table", "questionr")
 
 # # Install packages not yet installed
 # installed_packages <- packages %in% rownames(installed.packages())
@@ -60,24 +60,29 @@ gmd14ind_dt <- as.data.table(read.dta13("D:/Ify/GitProjects/SAEMaputoInformality
 gmd14labor_dt[, wage_informal := ifelse(empstat == "1.Paid Employee" & socialsec == "1.Yes", 0, 
                                  ifelse(empstat == "1.Paid Employee" & socialsec == "0.No", 1, NA))]
 
-gmdlabor_dt$wage_informal <- as.factor(gmdlabor_dt$wage_informal)
+gmd14labor_dt$wage_informal <- as.factor(gmd14labor_dt$wage_informal)
 
 ### function to predict informality
 
 predict_wageinformality <- function(gmdlabor_dt,
-                                    gmdincome_dt,
+                                    gmdind_dt,
                                     xvars = c("ageyrs", "sex", "industrycat10", "educat4", "whours"),
-                                    yvar = "wage_informal"){
+                                    yvar = "wage_informal",
+                                    train_rate = 0.9){
   
   gmdlabor_dt[, whours_total := whours_2 + whours]
+  
+  labor_vars <- colnames(gmdlabor_dt)
+  ind_vars <- colnames(gmdind_dt)
+  
+  missing_vars <- ind_vars[!(ind_vars %in% labor_vars)]
+  missing_vars <- missing_vars[missing_vars %in% xvars]
 
-  gmdlabor_dt <- gmdincome_dt[,c("hid", "ageyrs", "pid", "sex", "educat4")][gmdlabor_dt, on = c("hid", "pid")]
+  gmdlabor_dt <- gmdind_dt[,c("hid", "pid", missing_vars), with = F][gmdlabor_dt, on = c("hid", "pid")]
   gmdlabor_dt[, empstat := as.character(empstat)]
   gmdlabor_dt[, socialsec := as.character(socialsec)]
 
-  
-
-  model <- formula("wage_informal ~ ageyrs + sex + industrycat10 + educat4 +  whours")
+  model <- formula(paste0(yvar, " ~ ", paste(xvars, collapse = " + ")))
 
   scaler <- function(x){
   
@@ -92,30 +97,38 @@ predict_wageinformality <- function(gmdlabor_dt,
 
   ##build model with 90% of the sample
   model_dt <- 
-    na.omit(gmdlabor_dt[is.na(wage_informal) == FALSE, c("wage_informal", "ageyrs", "sex",
-                                                           "industrycat10", "educat4", 
-                                                           "whours", "scaled_weights")])
+    na.omit(gmdlabor_dt[is.na(wage_informal) == FALSE, c(yvar, xvars, "scaled_weights"), with = FALSE])
 
-  train_dt <- model_dt[sample(1:nrow(model_dt), 0.9*nrow(model_dt)),]
-  test_dt <- model_dt[!sample(1:nrow(model_dt), 0.9*nrow(model_dt)),]
+  train_dt <- model_dt[sample(1:nrow(model_dt), train_rate*nrow(model_dt)),]
+  test_dt <- model_dt[!sample(1:nrow(model_dt), (1 - train_rate)*nrow(model_dt)),]
 
   logit_model <- glm(model, 
-                     family = "binomial", 
+                     family = binomial(link = "logit"), 
                      data = train_dt,
                      weights = scaled_weights)
 
-
+  set.seed(123)
   test_dt[,wage_informalpred := predict(logit_model, newdata = test_dt)]
   test_dt[,wage_informalpred := ifelse(wage_informalpred > 0.5, 1, 0)]
 
-  test_dt[,prop.table(questionr::wtd.table(wage_informalpred, wage_informal, weights = scaled_weights), margin = 2)]
+  confusion_matrix <- test_dt[,prop.table(wtd.table(wage_informalpred, 
+                                                    wage_informal, 
+                                                    weights = scaled_weights), 
+                                          margin = 2)]
+  
+  
+  #### predict into the 10% census
+  
 
+  return(list(logit_model = logit_model, confusion_matrix = confusion_matrix))
+  
   
 }
 
 
 
-
+predict_wageinformality(gmdlabor_dt = gmd14labor_dt, 
+                        gmdind_dt = gmd14ind_dt)
 
 
 
