@@ -66,6 +66,7 @@ gmd14labor_dt$wage_informal <- as.factor(gmd14labor_dt$wage_informal)
 
 predict_wageinformality <- function(gmdlabor_dt,
                                     gmdind_dt,
+                                    census_dt,
                                     xvars = c("ageyrs", "sex", "industrycat10", "educat4", "whours"),
                                     yvar = "wage_informal",
                                     train_rate = 0.9){
@@ -117,9 +118,7 @@ predict_wageinformality <- function(gmdlabor_dt,
                                           margin = 2)]
   
   
-  #### predict into the 10% census
-  
-
+ 
   return(list(logit_model = logit_model, confusion_matrix = confusion_matrix))
   
   
@@ -133,7 +132,7 @@ predict_wageinformality(gmdlabor_dt = gmd14labor_dt,
 
 
 
-
+#### plot 
 
 
 
