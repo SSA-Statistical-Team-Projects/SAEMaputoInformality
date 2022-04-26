@@ -62,8 +62,11 @@ gmd14labor_dt[, wage_informal := ifelse(empstat == "1.Paid Employee" & socialsec
 
 gmd14labor_dt$wage_informal <- as.factor(gmd14labor_dt$wage_informal)
 
-### function to predict informality
 
+censusraw_dt <- as.data.table(read.dta13("//WBGMSAFR1001/AFR_Database/SSAPOV-Harmonization/Daylan/GMD/MOZ_Census/01.Input/census_10_updated.dta"))
+
+
+### function to predict informality
 predict_wageinformality <- function(gmdlabor_dt,
                                     gmdind_dt,
                                     census_dt,
