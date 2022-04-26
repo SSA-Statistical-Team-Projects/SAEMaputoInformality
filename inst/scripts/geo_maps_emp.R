@@ -79,7 +79,7 @@ display.brewer.all(colorblindFriendly = TRUE)
   self_emp_share<- tmap::tmap_mode("view")+
     tmap::tm_shape(emp_dt) +
     tmap::tm_fill("self_emp_share",
-                  title="Share of self-employment",palette="-Spectral",
+                  title="Share of self-employment",
                   id="Bairro", breaks = c(0,0.1,0.2,0.3,0.4,0.5,0.7,0.8,0.9,1.0),
                   popup.vars=c("Name"="Bairro", "Share"="self_emp_share"))+
     tmap::tm_borders()
@@ -90,7 +90,7 @@ display.brewer.all(colorblindFriendly = TRUE)
   wage_emp_share<- tmap::tmap_mode("view")+
     tmap::tm_shape(emp_dt) +
     tmap::tm_fill("wage_emp_share",
-                  title="Share of wage employment",palette="-Spectral",
+                  title="Share of wage employment",
                   id="Bairro", breaks = c(0,0.1,0.2,0.3,0.4,0.5,0.7,0.8,0.9,1.0),
                   popup.vars=c("Name"="Bairro", "Share"="wage_emp_share"))+
     tmap::tm_borders()
