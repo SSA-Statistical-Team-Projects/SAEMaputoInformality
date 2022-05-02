@@ -5,14 +5,16 @@
 # Package names
 packages <- c("SAEplus", "raster", "sf", "data.table", "fst")
 
-# Install packages not yet installed
-installed_packages <- packages %in% rownames(installed.packages())
-if (any(installed_packages == FALSE)) {
-  install.packages(packages[!installed_packages])
-}
+# # Install packages not yet installed
+# installed_packages <- packages %in% rownames(installed.packages())
+# if (any(installed_packages == FALSE)) {
+#   install.packages(packages[!installed_packages])
+# }
+#
+# # Packages loading
+# invisible(lapply(packages, library, character.only = TRUE))
 
-# Packages loading
-invisible(lapply(packages, library, character.only = TRUE))
+load_packages(packages)
 
 sf_use_s2(FALSE)
 
@@ -41,34 +43,6 @@ grid_dt <- read_sf(dsn = "//esapov/esapov/MOZ/GEO/Population/poppoly",
                    layer = "Moz_poppoly_gridded")
 
 
-###### parallelization process
-
-parallel_extract <- function(shp_dt,
-                             raster_list,
-                             fun_list,
-                             numCores){
-
-  ##initiating the parallelization process
-  numCores <- min(numCores, parallel::detectCores()) ##use the minimum of the specified processors or the max
-
-  doParallel::registerDoParallel(cores = numCores) ##initiate the number of cores to be used
-  parallelMap::parallelLibrary("foreach") ##loading the parallel looping library
-  parallelMap::parallelLibrary("exactextractr") ##loading the parallel looping library
-
-  ##the parallelization process
-  grid_list <-
-    foreach (i = 1:length(raster_list)) %dopar% {
-
-      exactextractr::exact_extract(x = raster_list[[i]],
-                                   y = shp_dt,
-                                   fun = fun_list[i])
-
-    }
-
-
-  return(grid_list)
-
-}
 
 fun_list <- c("sum", "mean", "mean", "mean", "mean", "mean", "mean",
               "sum", "sum", "mean", "sum")

@@ -1,0 +1,42 @@
+---
+title: "Geospatial Mapping of Urban Informality in Mozambique"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Geospatial Mapping of Urban Informality in Mozambique}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+#library(SAEMaputoInformality)
+```
+
+## Paper Outline
+- Introduction 
+- Data and methodology 
+  a. Description of census data on informality 
+  b.	Predicting the informality status of wage workers 
+  c.	Description of census data on cell phone ownership, internet usage, and mobile money  
+  d.	Description of geospatial data on cell phone coverage  
+- Where in urban areas are there high shares of informal sector workers? 
+- How concentrated are informal workers in particular pockets of informality? 
+- To what extent do informal sector workers benefit from internet use, cell phone ownership, bank accounts, and mobile money? 
+- How is informality associated with lack of cell phone coverage? 
+- Conclusion  
+
+## Predicting the informality status of wage workers
+We use the Mozambique Household Budget Survey 2014/15 predict informality amongst wage workers. We define wage workers in the survey as informal if they are not enrolled in the national social security program. 
+
+```{r, echo = FALSE, include = FALSE}
+
+
+
+```
+
