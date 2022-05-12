@@ -36,7 +36,75 @@ We use the Mozambique Household Budget Survey 2014/15 predict informality amongs
 
 ```{r, echo = FALSE, include = FALSE}
 
+### a prediction model for estimating informality within the survey
+
+infmodel_dt <- infmodeldata
+minicensus_dt <- minicensus
+
+scaler <- function(x){
+  
+  average_x <- mean(x, na.rm = TRUE)
+  
+  y <- x / average_x
+  
+  return(y)
+  
+}
+
+infmodel_dt[,weight := scaler(wta_hh)]
+
+## build a simple logit model
+xvars <- c("ageyrs", "sex", "industrycat10", "educat10", "whours")
+
+model <- paste0("socialsec ~ ", paste(xvars, collapse = " + "))
+
+logitmodel <- glm(model, 
+                  family = binomial(link = "logit"),
+                  data = na.omit(infmodel_dt[empstat == "1.Paid Employee", 
+                                             c(xvars, "socialsec", "weight"), with = F]),
+                  weights = weight)
+
+minicensus_dt[,informal_prob := predict(logitmodel, newdata = minicensus_dt, type = "response")]
+
 
 
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
