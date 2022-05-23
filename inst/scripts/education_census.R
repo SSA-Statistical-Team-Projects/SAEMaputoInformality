@@ -21,8 +21,6 @@ invisible(lapply(packages, library, character.only = TRUE))
 
 
 minicensus_dt <- read_fst(path = "//esapov/esapov/MOZ/GEO/Population/tenpercent_cleancensus.fst",
-                          columns=c("P24_NIVEL_DE_ENSINO_CONCLUIDO_1", "FREQUENCIA_ESCOLAR" , "NIVEL_DE_ENSINO_FREQUENTADO" ,
-                                    "P24_NIVEL_DE_ENSINO_CONCLUIDO_1","CURSO_SUPERIOR_CONCLUIDOX","IDADE", "CodProv", "CodDist", "CodPost" ),
                           as.data.table = TRUE)
 
 ##Check the levels of teh concluded class.
@@ -60,7 +58,7 @@ minicensus_dt[Educat %in% 6:7, educat4:="Secondary (complete or incomplete)"]
 minicensus_dt[Educat %in% 8:15, educat4:="Tertiary (complete or incomplete)"]
 table(minicensus_dt$educat4, useNA= "always")
 
-write_fst(minicensus_dt,"//esapov/esapov/MOZ/GEO/Population/education_tenpercent.fst")
+write_fst(minicensus_dt,"//esapov/esapov/MOZ/GEO/Population/tenpercent_cleancensus.fst")
 
 
 
