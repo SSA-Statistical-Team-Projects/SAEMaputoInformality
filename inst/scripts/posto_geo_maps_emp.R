@@ -56,8 +56,6 @@ posto_dt <- as.data.table(posto_dt)
 emp_dt<-emp_dt[posto_dt, on = c("CodProv", "CodDist", "CodPost")]
 
 
-
-
 #Create the share of self employment and wage worker
 emp_dt$self_emp_share <-emp_dt$self_emp/emp_dt$employed
 emp_dt$wage_emp_share <-emp_dt$wage_emp/emp_dt$employed
