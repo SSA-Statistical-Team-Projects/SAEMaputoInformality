@@ -94,6 +94,72 @@ fullempshare_tmap <-
 
 tmap_save(fullempshare_tmap, "inst/plots/posto_urbanemptype.html")
 
+## add the nighttimelights data
+shp_dt <- read_sf(dsn = "//esapov/esapov/MOZ/GEO/Population/poppoly",
+                  layer = "Moz_poppoly_full_gridded")
+shp_dt <- as.data.table(shp_dt)
+shp_dt <- shp_dt[,c("CodProv", "CodDist", "CodPost", "poly_id", "population")]
+
+ntl_dt <- readRDS("//esapov/esapov/MOZ/GEO/GEE/mozmap_process/ntl_dt.RDS")
+ntl_dt <- shp_dt[ntl_dt, on = "poly_id"]
+
+ntl_dt <- ntl_dt[population > 0,]
+ntl_dt <- ntl_dt[,c("CodProv", "CodDist", "CodPost", "mean_ntl", "min_ntl",
+                    "max_ntl", "median_ntl", "sd_ntl", "lowlightrate_ntl")]
+
+ntl_cols <- c("mean_ntl", "min_ntl", "max_ntl", "median_ntl", "sd_ntl",
+              "lowlightrate_ntl")
+
+ntl_dt <- ntl_dt[,lapply(.SD, mean), by = c("CodProv", "CodDist", "CodPost")]
+
+emp_dt <- as.data.table(emp_dt)
+emp_dt <- ntl_dt[emp_dt, on = c("CodProv", "CodDist", "CodPost")]
+
+
+### compute correlation matrix
+cor_vars <- colnames(emp_dt)[!colnames(emp_dt) %in% c("CodProv", "CodDist",
+                                                      "CodPost", "geometry",
+                                                      "poly_id")]
+cor_dt <- as.data.table(emp_dt)
+
+cor_dt <- cor_dt[,cor_vars, with = F]
+
+cor_dt <- na.omit(cor_dt)
+
+write.csv(cor_dt[,cor(.SD)],
+          "inst/extdata/correlationmatrix.csv")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
