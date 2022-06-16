@@ -94,6 +94,55 @@ fullempshare_tmap <-
 
 tmap_save(fullempshare_tmap, "inst/plots/posto_urbanemptype.html")
 
+## augument the facet data
+facet_dt <- as.data.table(posto_dt)[facet_dt, on = c("CodProv", "CodDist", "CodPost")]
+
+### create scatter plot
+### remove outliers
+
+create_plot <- function(var = "Tower_per_sqkm",
+                        mainlabel){
+
+  facet_dt[,iqr := IQR(get(var), na.rm = TRUE)]
+  facet_dt[,quart_one := quantile(get(var), 0.25, na.rm = TRUE)]
+  facet_dt[,quart_three := quantile(get(var), 0.75, na.rm = TRUE)]
+  facet_dt[,lower := quart_one - 1.5*iqr]
+  facet_dt[,higher := quart_three + 1.5*iqr]
+  facet_dt[,outlier := ifelse(get(var) > higher | get(var) < lower, 1, 0)]
+
+
+  ggplot(data = facet_dt[outlier == 0,],
+         aes(x = get(var), y = value,
+             color = variable)) +
+    stat_poly_eq(aes(label = paste(after_stat(eq.label),
+                                   after_stat(rr.label), sep = "*\", \"*"))) +
+    geom_point(alpha = 0.3) +
+    geom_smooth(method = "lm", se = FALSE) +
+    ggtitle(label = mainlabel) +
+    xlab(var) + ylab("Share of Urban Employment Type")
+
+  ggsave(paste0("inst/plots/", var, ".pdf"), width = 10, height = 10)
+
+
+}
+
+plot_vars <- c("count", "cv_area", "cv_length", "density", "mean_length", "total_area", "total_length",
+               "Tower_per_sqkm")
+mainlabel_list <- c("How Building Count per sqkm varies with Employment Type Shares at Posto Level",
+                    "How Building CV Area varies with Employment Type Shares at Posto Level",
+                    "How Building CV Length varies with Employment Type Shares at Posto Level",
+                    "How Building Density varies with Employment Type Shares at Posto Level",
+                    "How Building Mean Length varies with Employment Type Shares at Posto Level",
+                    "How Building Total Area varies with Employment Type Shares at Posto Level",
+                    "How Building Total Length varies with Employment Type Shares at Posto Level",
+                    "How Cell Tower Count per sqkm varies with Employment Type Shares at Posto Level")
+
+
+mapply(create_plot, plot_vars, mainlabel_list)
+
+
+
+
 ## add the nighttimelights data
 shp_dt <- read_sf(dsn = "//esapov/esapov/MOZ/GEO/Population/poppoly",
                   layer = "Moz_poppoly_full_gridded")
