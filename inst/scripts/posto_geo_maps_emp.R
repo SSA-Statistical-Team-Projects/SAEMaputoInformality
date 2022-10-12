@@ -71,7 +71,8 @@ display.brewer.all()
 display.brewer.all(colorblindFriendly = TRUE)
 
 ##create faceted maps
-facet_dt <- emp_dt[,c("CodProv", "CodDist", "CodPost", "higheduc_se", "loweduc_se", "other",
+facet_dt <- emp_dt[,c("CodProv", "CodDist", "CodPost",
+                      "higheduc_se", "loweduc_se", "other",
                       "unknowneduc_se", "wageworker", "geometry")]
 
 facet_dt <- as.data.table(facet_dt)
@@ -94,6 +95,7 @@ fullempshare_tmap <-
 
 tmap_save(fullempshare_tmap, "inst/plots/posto_urbanemptype.html")
 
+<<<<<<< Updated upstream
 ## augument the facet data
 facet_dt <- as.data.table(posto_dt)[facet_dt, on = c("CodProv", "CodDist", "CodPost")]
 
@@ -141,6 +143,9 @@ mainlabel_list <- c("How Building Count per sqkm varies with Employment Type Sha
 mapply(create_plot, plot_vars, mainlabel_list)
 
 
+=======
+## include side by side map of cell phone access and informality maps
+>>>>>>> Stashed changes
 
 
 ## add the nighttimelights data
