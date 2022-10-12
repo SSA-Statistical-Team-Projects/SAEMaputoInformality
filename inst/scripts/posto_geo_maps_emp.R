@@ -11,7 +11,7 @@ if (Sys.info()[["user"]] == "wb570371"){
 
 packages <- c("sf", "fst", "tidyverse", "dplyr",
               "data.table", "tmap", "leaflet", "questionr",
-              "RColorBrewer")
+              "RColorBrewer", "ggplot2", "ggpmisc")
 devtools::load_all()
 load_packages(packages)
 
@@ -95,7 +95,6 @@ fullempshare_tmap <-
 
 tmap_save(fullempshare_tmap, "inst/plots/posto_urbanemptype.html")
 
-<<<<<<< Updated upstream
 ## augument the facet data
 facet_dt <- as.data.table(posto_dt)[facet_dt, on = c("CodProv", "CodDist", "CodPost")]
 
@@ -141,11 +140,6 @@ mainlabel_list <- c("How Building Count per sqkm varies with Employment Type Sha
 
 
 mapply(create_plot, plot_vars, mainlabel_list)
-
-
-=======
-## include side by side map of cell phone access and informality maps
->>>>>>> Stashed changes
 
 
 ## add the nighttimelights data
