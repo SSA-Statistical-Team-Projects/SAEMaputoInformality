@@ -45,19 +45,28 @@ scaler <- function(x){
 
 }
 
-infmodel_dt[,weight := scaler(wta_hh)]
+iof14il_dt[,weight := scaler(wta_hh)]
 
+iof14il_dt[,socialsec_dummy := ifelse(socialsec == "1.Yes", 1,
+                                      ifelse(socialsec == "0.No", 0, NA))]
 ## build a simple logit model
 xvars <- c("ageyrs", "sex", "industrycat10", "educat10", "whours")
 
-model <- paste0("socialsec ~ ", paste(xvars, collapse = " + "))
+model <- paste0("socialsec_dummy ~ ", paste(xvars, collapse = " + "))
 
 logitmodel <- glm(model,
                   family = binomial(link = "logit"),
-                  data = na.omit(infmodel_dt[empstat == "1.Paid Employee",
-                                             c(xvars, "socialsec", "weight"), with = F]),
+                  data = na.omit(iof14il_dt[empstat == "1.Paid Employee",
+                                             c(xvars, "socialsec_dummy", "weight"), with = F]),
                   weights = weight)
 
+
+
+## test to see how well we are predicting informality
+infmodel_dt <- na.omit(iof14il_dt[empstat == "1.Paid Employee",
+                                  c(xvars, "socialsec_dummy", "weight"), with = F])
+
+infmodel_dt[,informal_prob := predict(logitmodel, type = "response")]
 
 minicensus_dt[,informal_prob := predict(logitmodel, newdata = minicensus_dt, type = "response")]
 

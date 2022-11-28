@@ -1,0 +1,17 @@
+
+-	Stacked bar charts to help us understand how the education-work types groups vary in select areas. The categories would be HE self-employed, LE self-employed, HE wage, LE wage, employer, unpaid, other
+
+-	We agreed I would consolidate the groupings to focus on low and high educated self employed and wage workers, as well as unpaid (not disaggregated by education level) and create the maps for Maputo Province and maybe one other city with an interesting trend worth showing
+
+-	A correlation matrix or correlation graphs to show relationship between job types and the presence of different geospatial features We had talked about how a correlation coefficient would be an average point estimate while the graphs would allow for us to see correlations across the range of a geo-spatial variable. We agreed that you would run a lot of graphs and a correlation matrix and we would look at those to determine which are most interesting. (I recall from your earlier graphs that some measures of building cover were not significantly correlated with share of job type x, while others did show correlations)
+
+-	Including a linear regression (as opposed to multinomial logit) relating job types and the features as well as access to services. We talked about running linear regressions with only one regressor and running a linear model with all the regressors (those that are not too highly correlated with each other!)
+
+
+
+
+To do:
+
+- Address all the comments left in the Word document. Accept all her changes first before tracking the ones I make
+
+- Fix the issue with the plots
