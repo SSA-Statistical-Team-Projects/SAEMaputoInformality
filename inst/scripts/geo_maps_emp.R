@@ -1170,6 +1170,26 @@ model_function <- function(x,
 }
 
 
+model_function2 <- function(x,
+                            y,
+                            inf_type){
+
+  y <- paste0(y, "", sep = " ~ ")
+  model_formula <- formula(paste(y, paste(x, collapse = " + ")))
+
+  master_dt <- as.data.table(master_dt)
+
+  reg_model <- lm(formula = model_formula,
+                  data = na.omit(master_dt[(Distrito %in% city_list |
+                                              Provincia %in% "Maputo Cidade") &
+                                             informal_type == inf_type,
+                                           c(x, "iw_rate", "population"),
+                                           with = FALSE]))
+
+  return(reg_model)
+
+}
+
 ### using the first 4 PCA variables that account for 86.7% of the variation
 
 
@@ -1268,6 +1288,7 @@ lese_model <- model_function(x = lese_vars,
                              inf_type = "loweduc-selfemp")
 save(lese_model, file = "inst/extdata/lese_model3.Rdata")
 
+
 hewage_model <- model_function(x = lese_vars,
                                y = "iw_rate",
                                inf_type = "higheduc-wage")
@@ -1293,6 +1314,37 @@ lewage_model <- model_function(x = lese_vars,
                                inf_type = "loweduc-wage")
 save(lewage_model, file = "inst/extdata/lewage_model3.Rdata")
 
+###just for the rsquares
+lesersq_model <- model_function2(x = lese_vars,
+                                y = "iw_rate",
+                                inf_type = "loweduc-selfemp")
+
+hewagersq_model <- model_function2(x = lese_vars,
+                                  y = "iw_rate",
+                                  inf_type = "higheduc-wage")
+
+emprsq_model <- model_function2(x = lese_vars,
+                               y = "iw_rate",
+                               inf_type = "employer")
+
+upfrsq_model <- model_function2(x = lese_vars,
+                               y = "iw_rate",
+                               inf_type = "unpaidfam")
+
+hesersq_model <- model_function2(x = lese_vars,
+                                y = "iw_rate",
+                                inf_type = "higheduc-selfemp")
+
+lewagersq_model <- model_function2(x = lese_vars,
+                                  y = "iw_rate",
+                                  inf_type = "loweduc-wage")
+
+rsq_set <- c(summary(lesersq_model)$r.squared,
+             summary(hewagersq_model)$r.squared,
+             summary(emprsq_model)$r.squared,
+             summary(upfrsq_model)$r.squared,
+             summary(hesersq_model)$r.squared,
+             summary(lewagersq_model)$r.squared)
 
 ## include only night time light intensity
 lese_vars <- c("lrade9lmu",
@@ -1330,6 +1382,38 @@ lewage_model <- model_function(x = lese_vars,
                                y = "iw_rate",
                                inf_type = "loweduc-wage")
 save(lewage_model, file = "inst/extdata/lewage_model4.Rdata")
+
+###just for the rsquares
+lesersq_model <- model_function2(x = lese_vars,
+                                 y = "iw_rate",
+                                 inf_type = "loweduc-selfemp")
+
+hewagersq_model <- model_function2(x = lese_vars,
+                                   y = "iw_rate",
+                                   inf_type = "higheduc-wage")
+
+emprsq_model <- model_function2(x = lese_vars,
+                                y = "iw_rate",
+                                inf_type = "employer")
+
+upfrsq_model <- model_function2(x = lese_vars,
+                                y = "iw_rate",
+                                inf_type = "unpaidfam")
+
+hesersq_model <- model_function2(x = lese_vars,
+                                 y = "iw_rate",
+                                 inf_type = "higheduc-selfemp")
+
+lewagersq_model <- model_function2(x = lese_vars,
+                                   y = "iw_rate",
+                                   inf_type = "loweduc-wage")
+
+rsq_set <- c(summary(lesersq_model)$r.squared,
+             summary(hewagersq_model)$r.squared,
+             summary(emprsq_model)$r.squared,
+             summary(upfrsq_model)$r.squared,
+             summary(hesersq_model)$r.squared,
+             summary(lewagersq_model)$r.squared)
 
 
 ## include only average electrification likelihood
@@ -1369,6 +1453,37 @@ lewage_model <- model_function(x = lese_vars,
                                inf_type = "loweduc-wage")
 save(lewage_model, file = "inst/extdata/lewage_model5.Rdata")
 
+###just for the rsquares
+lesersq_model <- model_function2(x = lese_vars,
+                                 y = "iw_rate",
+                                 inf_type = "loweduc-selfemp")
+
+hewagersq_model <- model_function2(x = lese_vars,
+                                   y = "iw_rate",
+                                   inf_type = "higheduc-wage")
+
+emprsq_model <- model_function2(x = lese_vars,
+                                y = "iw_rate",
+                                inf_type = "employer")
+
+upfrsq_model <- model_function2(x = lese_vars,
+                                y = "iw_rate",
+                                inf_type = "unpaidfam")
+
+hesersq_model <- model_function2(x = lese_vars,
+                                 y = "iw_rate",
+                                 inf_type = "higheduc-selfemp")
+
+lewagersq_model <- model_function2(x = lese_vars,
+                                   y = "iw_rate",
+                                   inf_type = "loweduc-wage")
+
+rsq_set <- c(summary(lesersq_model)$r.squared,
+             summary(hewagersq_model)$r.squared,
+             summary(emprsq_model)$r.squared,
+             summary(upfrsq_model)$r.squared,
+             summary(hesersq_model)$r.squared,
+             summary(lewagersq_model)$r.squared)
 
 ## include only cell phone tower
 lese_vars <- c("ltower",
@@ -1407,6 +1522,37 @@ lewage_model <- model_function(x = lese_vars,
                                inf_type = "loweduc-wage")
 save(lewage_model, file = "inst/extdata/lewage_model6.Rdata")
 
+###just for the rsquares
+lesersq_model <- model_function2(x = lese_vars,
+                                 y = "iw_rate",
+                                 inf_type = "loweduc-selfemp")
+
+hewagersq_model <- model_function2(x = lese_vars,
+                                   y = "iw_rate",
+                                   inf_type = "higheduc-wage")
+
+emprsq_model <- model_function2(x = lese_vars,
+                                y = "iw_rate",
+                                inf_type = "employer")
+
+upfrsq_model <- model_function2(x = lese_vars,
+                                y = "iw_rate",
+                                inf_type = "unpaidfam")
+
+hesersq_model <- model_function2(x = lese_vars,
+                                 y = "iw_rate",
+                                 inf_type = "higheduc-selfemp")
+
+lewagersq_model <- model_function2(x = lese_vars,
+                                   y = "iw_rate",
+                                   inf_type = "loweduc-wage")
+
+rsq_set <- c(summary(lesersq_model)$r.squared,
+             summary(hewagersq_model)$r.squared,
+             summary(emprsq_model)$r.squared,
+             summary(upfrsq_model)$r.squared,
+             summary(hesersq_model)$r.squared,
+             summary(lewagersq_model)$r.squared)
 
 ## include only building urban
 lese_vars <- c("bld_urban",
@@ -1559,6 +1705,37 @@ lewage_model <- model_function(x = lese_vars,
                                inf_type = "loweduc-wage")
 save(lewage_model, file = "inst/extdata/lewage_model10.Rdata")
 
+###just for the rsquares
+lesersq_model <- model_function2(x = lese_vars,
+                                 y = "iw_rate",
+                                 inf_type = "loweduc-selfemp")
+
+hewagersq_model <- model_function2(x = lese_vars,
+                                   y = "iw_rate",
+                                   inf_type = "higheduc-wage")
+
+emprsq_model <- model_function2(x = lese_vars,
+                                y = "iw_rate",
+                                inf_type = "employer")
+
+upfrsq_model <- model_function2(x = lese_vars,
+                                y = "iw_rate",
+                                inf_type = "unpaidfam")
+
+hesersq_model <- model_function2(x = lese_vars,
+                                 y = "iw_rate",
+                                 inf_type = "higheduc-selfemp")
+
+lewagersq_model <- model_function2(x = lese_vars,
+                                   y = "iw_rate",
+                                   inf_type = "loweduc-wage")
+
+rsq_set <- c(summary(lesersq_model)$r.squared,
+             summary(hewagersq_model)$r.squared,
+             summary(emprsq_model)$r.squared,
+             summary(upfrsq_model)$r.squared,
+             summary(hesersq_model)$r.squared,
+             summary(lewagersq_model)$r.squared)
 
 ## include only log total building length
 lese_vars <- c("lbld_total_length",
