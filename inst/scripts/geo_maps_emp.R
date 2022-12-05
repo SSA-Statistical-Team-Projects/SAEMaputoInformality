@@ -781,21 +781,30 @@ bairroelect_dt <- shp_dt[,lapply(.SD, weighted.mean, w = population, na.rm = TRU
                          .SDcols = colnames(elect_dt),
                          by = c("CodProv", "CodDist", "CodPost", "CodLocal", "CodBairro")]
 
-master_dt <- bairroelect_dt[master_dt, on = c("CodProv", "CodDist", "CodPost", "CodLocal", "CodBairro")]
+master_dt <- bairroelect_dt[master_dt, on = c("CodProv", "CodDist", "CodPost",
+                                              "CodLocal", "CodBairro")]
 
 ### quickly include population data
-pop_dt <- shp_dt[,sum(population, na.rm = TRUE), by = c("CodProv", "CodDist", "CodPost", "CodLocal", "CodBairro")]
+pop_dt <- shp_dt[,sum(population, na.rm = TRUE), by = c("CodProv", "CodDist", "CodPost",
+                                                        "CodLocal", "CodBairro")]
+
+popd_dt <- shp_dt[,mean(population, na.rm = TRUE), by = c("CodProv", "CodDist", "CodPost",
+                                                         "CodLocal", "CodBairro")]
+
+
 setnames(pop_dt, "V1", "population")
 master_dt <- pop_dt[,c("population", "CodProv", "CodDist",
-                       "CodPost", "CodLocal", "CodBairro")][master_dt, on = c("CodProv", "CodDist", "CodPost",
-                                                                              "CodLocal", "CodBairro")]
+                       "CodPost", "CodLocal", "CodBairro")][master_dt,
+                                                            on = c("CodProv", "CodDist", "CodPost",
+                                                                   "CodLocal", "CodBairro")]
 
 #### some regression models to estimate the relationship between the location of each education-labor class group
 #### and the variables we care about
 
 
 ###### add all the variables into master_dt
-geo_vars <- c("count", "cv_area", "cv_length", "density", "imagery_year", "mean_area", "mean_length",
+geo_vars <- c("count", "cv_area", "cv_length", "density",
+              "imagery_year", "mean_area", "mean_length",
               "total_area", "total_length", "urban", "cell_area")
 
 setnames(bairro_dt, geo_vars, unlist(lapply("bld", paste, geo_vars, sep = "_")))
@@ -806,7 +815,8 @@ setnames(master_dt, "rate", "iw_rate")
 
 master_dt[,liw_count := log(iw_count)]
 
-master_dt <- bairro_dt[,c(unlist(lapply("bld", paste, geo_vars, sep = "_"), "Tower_per_sqkm"), "CodProv",
+master_dt <- bairro_dt[,c(unlist(lapply("bld", paste, geo_vars, sep = "_"),
+                                 "Tower_per_sqkm"), "CodProv",
                           "CodDist", "CodPost",
                           "CodLocal", "CodBairro"), with = F][master_dt, on = c("CodProv", "CodDist",
                                                                                 "CodPost", "CodLocal",
@@ -1190,8 +1200,13 @@ model_function2 <- function(x,
 
 }
 
-### using the first 4 PCA variables that account for 86.7% of the variation
+master_dt <- popd_dt[master_dt, on = c("CodProv", "CodDist", "CodPost",
+                                       "CodLocal", "CodBairro")]
+setnames(master_dt, "V1", "pop_density")
 
+
+
+### using the first 4 PCA variables that account for 86.7% of the variation
 
 master_dt[,lrade9lmu := log(rade9lmu)]
 master_dt[,ltower := log(Tower_per_sqkm)]
@@ -1892,6 +1907,37 @@ lewage_model <- model_function(x = lese_vars,
                                inf_type = "loweduc-wage")
 save(lewage_model, file = "inst/extdata/lewage_model_wendy3.Rdata")
 
+###just for the rsquares
+lesersq_model <- model_function2(x = lese_vars,
+                                 y = "iw_rate",
+                                 inf_type = "loweduc-selfemp")
+
+hewagersq_model <- model_function2(x = lese_vars,
+                                   y = "iw_rate",
+                                   inf_type = "higheduc-wage")
+
+emprsq_model <- model_function2(x = lese_vars,
+                                y = "iw_rate",
+                                inf_type = "employer")
+
+upfrsq_model <- model_function2(x = lese_vars,
+                                y = "iw_rate",
+                                inf_type = "unpaidfam")
+
+hesersq_model <- model_function2(x = lese_vars,
+                                 y = "iw_rate",
+                                 inf_type = "higheduc-selfemp")
+
+lewagersq_model <- model_function2(x = lese_vars,
+                                   y = "iw_rate",
+                                   inf_type = "loweduc-wage")
+
+rsq_set <- c(summary(lesersq_model)$r.squared,
+             summary(hewagersq_model)$r.squared,
+             summary(emprsq_model)$r.squared,
+             summary(upfrsq_model)$r.squared,
+             summary(hesersq_model)$r.squared,
+             summary(lewagersq_model)$r.squared)
 
 #### save certain datasets
 save.image(file = "inst/extdata/informal_envir.Rdata")
@@ -2020,7 +2066,35 @@ gridExtra::grid.arrange(grobs = plot_set, nrow = 2)
 
 
 
+#### include the building density maps
+plot_set <-
+  lapply(X = c("Maputo Cidade", city_list),
+         FUN = plot_bairro_indicator,
+         dt = master_dt %>% st_as_sf(crs = 4326, agr = "constant"),
+         var = "bld_count",
+         legend_name = "Building Density")
 
+gridExtra::grid.arrange(grobs = plot_set, nrow = 2)
+
+#### include the population density
+plot_set <-
+  lapply(X = c("Maputo Cidade", city_list),
+         FUN = plot_bairro_indicator,
+         dt = master_dt %>% st_as_sf(crs = 4326, agr = "constant"),
+         var = "pop_density",
+         legend_name = "Population Density")
+
+gridExtra::grid.arrange(grobs = plot_set, nrow = 2)
+
+
+### correlation matrix for the 6 variables Wendy showed interest in
+### luminosity, electrification likelihood, population density,
+### building density, urban/rural, ICT density
+write.csv(master_dt[District %in% c(city_list, "Maputo Cidade") &
+                      informal_type == "loweduc-selfemp",
+                    c("rade9lmu", "set_lightscore_sy", "pop_density",
+                      "bld_count", "bld_urban", "Tower_per_sqkm")][,cor(.SD, use = "complete.obs")],
+          "inst/extdata/correlation.csv")
 
 
 
