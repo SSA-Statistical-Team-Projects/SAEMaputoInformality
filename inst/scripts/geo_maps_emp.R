@@ -1989,11 +1989,12 @@ master_dt <-
 plot_bairro_indicator <- function(dt,
                                   var,
                                   city,
-                                  legend_name){
+                                  legend_name,
+                                  ...){
 
   ggplot(dt[dt$District %in% city,]) +
     geom_sf(aes_string(fill = var)) +
-    scale_fill_viridis_c(option = "plasma", name = legend_name) +
+    scale_fill_viridis_c(option = "plasma", name = legend_name, ...) +
     ggtitle(city) +
     theme(text = element_text(size = 7.5))
 
@@ -2038,7 +2039,8 @@ plot_set <-
          FUN = plot_bairro_indicator,
          dt = master_dt %>% st_as_sf(crs = 4326, agr = "constant"),
          var = "population",
-         legend_name = "population")
+         legend_name = "population",
+         direction = -1)
 
 gridExtra::grid.arrange(grobs = plot_set, nrow = 2)
 
@@ -2049,7 +2051,8 @@ plot_set <-
          FUN = plot_bairro_indicator,
          dt = master_dt %>% st_as_sf(crs = 4326, agr = "constant"),
          var = "Tower_per_sqkm",
-         legend_name = "# Towers \n per sqkm")
+         legend_name = "# Towers \n per sqkm",
+         direction = -1)
 
 gridExtra::grid.arrange(grobs = plot_set, nrow = 2)
 
@@ -2060,7 +2063,8 @@ plot_set <-
          FUN = plot_bairro_indicator,
          dt = master_dt %>% st_as_sf(crs = 4326, agr = "constant"),
          var = "bld_urban",
-         legend_name = "Proportion of \n Urban Area")
+         legend_name = "Proportion of \n Urban Area",
+         direction = -1)
 
 gridExtra::grid.arrange(grobs = plot_set, nrow = 2)
 
@@ -2072,7 +2076,8 @@ plot_set <-
          FUN = plot_bairro_indicator,
          dt = master_dt %>% st_as_sf(crs = 4326, agr = "constant"),
          var = "bld_count",
-         legend_name = "Building Density")
+         legend_name = "Building Density",
+         direction = -1)
 
 gridExtra::grid.arrange(grobs = plot_set, nrow = 2)
 
@@ -2082,7 +2087,8 @@ plot_set <-
          FUN = plot_bairro_indicator,
          dt = master_dt %>% st_as_sf(crs = 4326, agr = "constant"),
          var = "pop_density",
-         legend_name = "Population Density")
+         legend_name = "Population Density",
+         direction = -1)
 
 gridExtra::grid.arrange(grobs = plot_set, nrow = 2)
 
@@ -2099,6 +2105,23 @@ write.csv(master_dt[District %in% c(city_list, "Maputo Cidade") &
 
 
 
+### Effecting some last minute changes requested by Wendy
+
+newinformal_dt$informal_name[newinformal_dt$informal_type == "employer"] <- "Employer"
+newinformal_dt$informal_name[newinformal_dt$informal_type == "higheduc-selfemp"] <- "Formal Self-Employed"
+newinformal_dt$informal_name[newinformal_dt$informal_type == "loweduc-selfemp"] <- "Informal Self-Employed"
+newinformal_dt$informal_name[newinformal_dt$informal_type == "higheduc-wage"] <- "Formal Employee"
+newinformal_dt$informal_name[newinformal_dt$informal_type == "loweduc-wage"] <- "Informal Employee"
+newinformal_dt$informal_name[newinformal_dt$informal_type == "unpaidfam"] <- "Unpaid Workers"
+
+newinformal_dt[,informal_name := factor(informal_name,
+                                        levels = c("Employer", "Formal Self-Employed", "Informal Self-Employed",
+                                                   "Formal Employee", "Informal Employee", "Unpaid Workers"))]
+ggplot(data = newinformal_dt[Distrito %in% c(city_list, "Maputo Cidade"),],
+       aes(x = Distrito, y = rate, fill = informal_name)) +
+  geom_bar(position = "fill", stat = "identity") +
+  scale_fill_discrete(name = "Class")
+ggsave("inst/plots/informalplots/stackbar_informality_selectcities.png")
 
 
 
