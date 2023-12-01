@@ -10,6 +10,8 @@ output:
 
 ```{r setup, include=FALSE}
 
+pacman::p_load(stargazer)
+
 knitr::opts_chunk$set(
   root.dir = rprojroot::find_rstudio_root_file()
 )
@@ -27,8 +29,7 @@ load("inst/extdata/lewage_model_wendy2.Rdata")
 load("inst/extdata/hewage_model_wendy2.Rdata")
 
 
-stargazer::stargazer(lese_model, hese_model, upf_model,
-                     emp_model, lewage_model, hewage_model,
+stargazer::stargazer(lese_model, hese_model, upf_model, emp_model, lewage_model, hewage_model,
                      type = "html",
                      title = "Model Results",
                      column.labels = c("Low Educated Self-Employed", "High Educated Self-Employed",
@@ -45,40 +46,7 @@ stargazer::stargazer(lese_model, hese_model, upf_model,
                      dep.var.caption = " ",
                      dep.var.labels = "Proportion of Worker Type")
 
-```
 
-
-
-
-
-##### Regression containing both Building Density and Population Density
-```{r, echo=FALSE, include=TRUE, results="asis"}
-
-load("inst/extdata/lese_model_wendy3.Rdata")
-load("inst/extdata/hese_model_wendy3.Rdata")
-load("inst/extdata/upf_model_wendy3.Rdata")
-load("inst/extdata/emp_model_wendy3.Rdata")
-load("inst/extdata/lewage_model_wendy3.Rdata")
-load("inst/extdata/hewage_model_wendy3.Rdata")
-
-
-stargazer::stargazer(lese_model, hese_model, upf_model,
-                     emp_model, lewage_model, hewage_model,
-                     type = "html",
-                     title = "Model Results",
-                     column.labels = c("Low Educated Self-Employed", "High Educated Self-Employed",
-                                       "Unpaid Family Worker", "Employer", "Low Educated Wage Worker",
-                                       "High Educated Wage Worker"),
-                     covariate.labels = c("Log Population Density", "Log Building Count",
-                                          "Log Night Light Intensity", "Avg Electrification Likelihood",
-                                          "Log Cell Tower Count per sqkm", "Proportion of Urban Area",
-                                          "Zambezia", "Tete",
-                                          "Sofala", "Maputo City",
-                                          "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate",
-                                          "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate",
-                                          "Own Fridge Rate", "Own Car Rate"),
-                     dep.var.caption = " ",
-                     dep.var.labels = "Proportion of Worker Type")
 
 ```
 
@@ -86,10 +54,36 @@ stargazer::stargazer(lese_model, hese_model, upf_model,
 
 
 
+<!-- ##### Regression containing both Building Density and Population Density -->
+<!-- ```{r, echo=FALSE, include=TRUE, results="asis"} -->
 
+<!-- load("inst/extdata/lese_model_wendy3.Rdata") -->
+<!-- load("inst/extdata/hese_model_wendy3.Rdata") -->
+<!-- load("inst/extdata/upf_model_wendy3.Rdata") -->
+<!-- load("inst/extdata/emp_model_wendy3.Rdata") -->
+<!-- load("inst/extdata/lewage_model_wendy3.Rdata") -->
+<!-- load("inst/extdata/hewage_model_wendy3.Rdata") -->
 
 
+<!-- stargazer::stargazer(lese_model, hese_model, upf_model, -->
+<!--                      emp_model, lewage_model, hewage_model, -->
+<!--                      type = "html", -->
+<!--                      title = "Model Results", -->
+<!--                      column.labels = c("Low Educated Self-Employed", "High Educated Self-Employed", -->
+<!--                                        "Unpaid Family Worker", "Employer", "Low Educated Wage Worker", -->
+<!--                                        "High Educated Wage Worker"), -->
+<!--                      covariate.labels = c("Log Population Density", "Log Building Count", -->
+<!--                                           "Log Night Light Intensity", "Avg Electrification Likelihood", -->
+<!--                                           "Log Cell Tower Count per sqkm", "Proportion of Urban Area", -->
+<!--                                           "Zambezia", "Tete", -->
+<!--                                           "Sofala", "Maputo City", -->
+<!--                                           "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate", -->
+<!--                                           "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate", -->
+<!--                                           "Own Fridge Rate", "Own Car Rate"), -->
+<!--                      dep.var.caption = " ", -->
+<!--                      dep.var.labels = "Proportion of Worker Type") -->
 
+<!-- ``` -->
 
 
 
@@ -277,328 +271,337 @@ stargazer::stargazer(lese_model, hese_model, upf_model,
 
 
 
-##### Regression containing both building footprint variables
-```{r, echo=FALSE, include=TRUE, results="asis"}
 
-load("inst/extdata/lese_model2.Rdata")
-load("inst/extdata/hese_model2.Rdata")
-load("inst/extdata/upf_model2.Rdata")
-load("inst/extdata/emp_model2.Rdata")
-load("inst/extdata/lewage_model2.Rdata")
-load("inst/extdata/hewage_model2.Rdata")
 
 
-stargazer::stargazer(lese_model, hese_model, upf_model,
-                     emp_model, lewage_model, hewage_model,
-                     type = "html",
-                     title = "Model Results",
-                     column.labels = c("Low Educated Self-Employed",
-                                       "High Educated Self-Employed",
-                                       "Unpaid Family Worker",
-                                       "Employer", "Low Educated Wage Worker",
-                                       "High Educated Wage Worker"),
-                     covariate.labels = c("Log Building Density",
-                                          "Log Total Building Length",
-                                          "Log Population",
-                                          "Log Night Light Intensity", "Avg Electrification Likelihood",
-                                          "Log Cell Tower Count per sqkm", "Proportion of Urban Area",
-                                          "Zambezia", "Tete",
-                                          "Sofala", "Maputo City",
-                                          "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate",
-                                          "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate",
-                                          "Own Fridge Rate", "Own Car Rate"),
-                     dep.var.caption = " ",
-                     dep.var.labels = "Proportion of Worker Type")
 
-```
 
-##### Regression containing only Log Population Density (and all the city and asset controls only)
-```{r, echo=FALSE, include=TRUE, results="asis"}
 
-load("inst/extdata/lese_model3.Rdata")
-load("inst/extdata/hese_model3.Rdata")
-load("inst/extdata/upf_model3.Rdata")
-load("inst/extdata/emp_model3.Rdata")
-load("inst/extdata/lewage_model3.Rdata")
-load("inst/extdata/hewage_model3.Rdata")
 
 
-stargazer::stargazer(lese_model, hese_model, upf_model,
-                     emp_model, lewage_model, hewage_model,
-                     type = "html",
-                     title = "Model Results",
-                     column.labels = c("Low Educated Self-Employed",
-                                       "High Educated Self-Employed",
-                                       "Unpaid Family Worker",
-                                       "Employer", "Low Educated Wage Worker",
-                                       "High Educated Wage Worker"),
-                     covariate.labels = c("Log Population Density",
-                                          "Zambezia", "Tete",
-                                          "Sofala", "Maputo City",
-                                          "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate",
-                                          "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate",
-                                          "Own Fridge Rate", "Own Car Rate"),
-                     dep.var.caption = " ",
-                     dep.var.labels = "Proportion of Worker Type")
 
-```
+<!-- ##### Regression containing both building footprint variables -->
+<!-- ```{r, echo=FALSE, include=TRUE, results="asis"} -->
 
+<!-- load("inst/extdata/lese_model2.Rdata") -->
+<!-- load("inst/extdata/hese_model2.Rdata") -->
+<!-- load("inst/extdata/upf_model2.Rdata") -->
+<!-- load("inst/extdata/emp_model2.Rdata") -->
+<!-- load("inst/extdata/lewage_model2.Rdata") -->
+<!-- load("inst/extdata/hewage_model2.Rdata") -->
 
-##### Regression containing only Night Time Light Intensity (and all the city and asset controls only)
-```{r, echo=FALSE, include=TRUE, results="asis"}
 
-load("inst/extdata/lese_model4.Rdata")
-load("inst/extdata/hese_model4.Rdata")
-load("inst/extdata/upf_model4.Rdata")
-load("inst/extdata/emp_model4.Rdata")
-load("inst/extdata/lewage_model4.Rdata")
-load("inst/extdata/hewage_model4.Rdata")
+<!-- stargazer::stargazer(lese_model, hese_model, upf_model, -->
+<!--                      emp_model, lewage_model, hewage_model, -->
+<!--                      type = "html", -->
+<!--                      title = "Model Results", -->
+<!--                      column.labels = c("Low Educated Self-Employed", -->
+<!--                                        "High Educated Self-Employed", -->
+<!--                                        "Unpaid Family Worker", -->
+<!--                                        "Employer", "Low Educated Wage Worker", -->
+<!--                                        "High Educated Wage Worker"), -->
+<!--                      covariate.labels = c("Log Building Density", -->
+<!--                                           "Log Total Building Length", -->
+<!--                                           "Log Population", -->
+<!--                                           "Log Night Light Intensity", "Avg Electrification Likelihood", -->
+<!--                                           "Log Cell Tower Count per sqkm", "Proportion of Urban Area", -->
+<!--                                           "Zambezia", "Tete", -->
+<!--                                           "Sofala", "Maputo City", -->
+<!--                                           "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate", -->
+<!--                                           "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate", -->
+<!--                                           "Own Fridge Rate", "Own Car Rate"), -->
+<!--                      dep.var.caption = " ", -->
+<!--                      dep.var.labels = "Proportion of Worker Type") -->
 
+<!-- ``` -->
 
-stargazer::stargazer(lese_model, hese_model, upf_model,
-                     emp_model, lewage_model, hewage_model,
-                     type = "html",
-                     title = "Model Results",
-                     column.labels = c("Low Educated Self-Employed",
-                                       "High Educated Self-Employed",
-                                       "Unpaid Family Worker",
-                                       "Employer", "Low Educated Wage Worker",
-                                       "High Educated Wage Worker"),
-                     covariate.labels = c("Night Time Light Intensity",
-                                          "Zambezia", "Tete",
-                                          "Sofala", "Maputo City",
-                                          "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate",
-                                          "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate",
-                                          "Own Fridge Rate", "Own Car Rate"),
-                     dep.var.caption = " ",
-                     dep.var.labels = "Proportion of Worker Type")
+<!-- ##### Regression containing only Log Population Density (and all the city and asset controls only) -->
+<!-- ```{r, echo=FALSE, include=TRUE, results="asis"} -->
 
-```
+<!-- load("inst/extdata/lese_model3.Rdata") -->
+<!-- load("inst/extdata/hese_model3.Rdata") -->
+<!-- load("inst/extdata/upf_model3.Rdata") -->
+<!-- load("inst/extdata/emp_model3.Rdata") -->
+<!-- load("inst/extdata/lewage_model3.Rdata") -->
+<!-- load("inst/extdata/hewage_model3.Rdata") -->
 
 
+<!-- stargazer::stargazer(lese_model, hese_model, upf_model, -->
+<!--                      emp_model, lewage_model, hewage_model, -->
+<!--                      type = "html", -->
+<!--                      title = "Model Results", -->
+<!--                      column.labels = c("Low Educated Self-Employed", -->
+<!--                                        "High Educated Self-Employed", -->
+<!--                                        "Unpaid Family Worker", -->
+<!--                                        "Employer", "Low Educated Wage Worker", -->
+<!--                                        "High Educated Wage Worker"), -->
+<!--                      covariate.labels = c("Log Population Density", -->
+<!--                                           "Zambezia", "Tete", -->
+<!--                                           "Sofala", "Maputo City", -->
+<!--                                           "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate", -->
+<!--                                           "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate", -->
+<!--                                           "Own Fridge Rate", "Own Car Rate"), -->
+<!--                      dep.var.caption = " ", -->
+<!--                      dep.var.labels = "Proportion of Worker Type") -->
 
-##### Regression containing only Avg Electrification Likelihood (and all the city and asset controls only)
-```{r, echo=FALSE, include=TRUE, results="asis"}
+<!-- ``` -->
 
-load("inst/extdata/lese_model5.Rdata")
-load("inst/extdata/hese_model5.Rdata")
-load("inst/extdata/upf_model5.Rdata")
-load("inst/extdata/emp_model5.Rdata")
-load("inst/extdata/lewage_model5.Rdata")
-load("inst/extdata/hewage_model5.Rdata")
 
+<!-- ##### Regression containing only Night Time Light Intensity (and all the city and asset controls only) -->
+<!-- ```{r, echo=FALSE, include=TRUE, results="asis"} -->
 
-stargazer::stargazer(lese_model, hese_model, upf_model,
-                     emp_model, lewage_model, hewage_model,
-                     type = "html",
-                     title = "Model Results",
-                     column.labels = c("Low Educated Self-Employed",
-                                       "High Educated Self-Employed",
-                                       "Unpaid Family Worker",
-                                       "Employer", "Low Educated Wage Worker",
-                                       "High Educated Wage Worker"),
-                     covariate.labels = c("Avg Electrification Likelihood",
-                                          "Zambezia", "Tete",
-                                          "Sofala", "Maputo City",
-                                          "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate",
-                                          "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate",
-                                          "Own Fridge Rate", "Own Car Rate"),
-                     dep.var.caption = " ",
-                     dep.var.labels = "Proportion of Worker Type")
+<!-- load("inst/extdata/lese_model4.Rdata") -->
+<!-- load("inst/extdata/hese_model4.Rdata") -->
+<!-- load("inst/extdata/upf_model4.Rdata") -->
+<!-- load("inst/extdata/emp_model4.Rdata") -->
+<!-- load("inst/extdata/lewage_model4.Rdata") -->
+<!-- load("inst/extdata/hewage_model4.Rdata") -->
 
-```
 
+<!-- stargazer::stargazer(lese_model, hese_model, upf_model, -->
+<!--                      emp_model, lewage_model, hewage_model, -->
+<!--                      type = "html", -->
+<!--                      title = "Model Results", -->
+<!--                      column.labels = c("Low Educated Self-Employed", -->
+<!--                                        "High Educated Self-Employed", -->
+<!--                                        "Unpaid Family Worker", -->
+<!--                                        "Employer", "Low Educated Wage Worker", -->
+<!--                                        "High Educated Wage Worker"), -->
+<!--                      covariate.labels = c("Night Time Light Intensity", -->
+<!--                                           "Zambezia", "Tete", -->
+<!--                                           "Sofala", "Maputo City", -->
+<!--                                           "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate", -->
+<!--                                           "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate", -->
+<!--                                           "Own Fridge Rate", "Own Car Rate"), -->
+<!--                      dep.var.caption = " ", -->
+<!--                      dep.var.labels = "Proportion of Worker Type") -->
 
-##### Regression containing only Log Cell tower count per sqkm (and all the city and asset controls only)
-```{r, echo=FALSE, include=TRUE, results="asis"}
+<!-- ``` -->
 
-load("inst/extdata/lese_model6.Rdata")
-load("inst/extdata/hese_model6.Rdata")
-load("inst/extdata/upf_model6.Rdata")
-load("inst/extdata/emp_model6.Rdata")
-load("inst/extdata/lewage_model6.Rdata")
-load("inst/extdata/hewage_model6.Rdata")
 
 
-stargazer::stargazer(lese_model, hese_model, upf_model,
-                     emp_model, lewage_model, hewage_model,
-                     type = "html",
-                     title = "Model Results",
-                     column.labels = c("Low Educated Self-Employed",
-                                       "High Educated Self-Employed",
-                                       "Unpaid Family Worker",
-                                       "Employer", "Low Educated Wage Worker",
-                                       "High Educated Wage Worker"),
-                     covariate.labels = c("Log Cell Tower Count per sqkm",
-                                          "Zambezia", "Tete",
-                                          "Sofala", "Maputo City",
-                                          "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate",
-                                          "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate",
-                                          "Own Fridge Rate", "Own Car Rate"),
-                     dep.var.caption = " ",
-                     dep.var.labels = "Proportion of Worker Type")
+<!-- ##### Regression containing only Avg Electrification Likelihood (and all the city and asset controls only) -->
+<!-- ```{r, echo=FALSE, include=TRUE, results="asis"} -->
 
-```
+<!-- load("inst/extdata/lese_model5.Rdata") -->
+<!-- load("inst/extdata/hese_model5.Rdata") -->
+<!-- load("inst/extdata/upf_model5.Rdata") -->
+<!-- load("inst/extdata/emp_model5.Rdata") -->
+<!-- load("inst/extdata/lewage_model5.Rdata") -->
+<!-- load("inst/extdata/hewage_model5.Rdata") -->
 
 
-##### Regression containing only Urban Building (and all the city and asset controls only)
-```{r, echo=FALSE, include=TRUE, results="asis"}
+<!-- stargazer::stargazer(lese_model, hese_model, upf_model, -->
+<!--                      emp_model, lewage_model, hewage_model, -->
+<!--                      type = "html", -->
+<!--                      title = "Model Results", -->
+<!--                      column.labels = c("Low Educated Self-Employed", -->
+<!--                                        "High Educated Self-Employed", -->
+<!--                                        "Unpaid Family Worker", -->
+<!--                                        "Employer", "Low Educated Wage Worker", -->
+<!--                                        "High Educated Wage Worker"), -->
+<!--                      covariate.labels = c("Avg Electrification Likelihood", -->
+<!--                                           "Zambezia", "Tete", -->
+<!--                                           "Sofala", "Maputo City", -->
+<!--                                           "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate", -->
+<!--                                           "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate", -->
+<!--                                           "Own Fridge Rate", "Own Car Rate"), -->
+<!--                      dep.var.caption = " ", -->
+<!--                      dep.var.labels = "Proportion of Worker Type") -->
 
-load("inst/extdata/lese_model7.Rdata")
-load("inst/extdata/hese_model7.Rdata")
-load("inst/extdata/upf_model7.Rdata")
-load("inst/extdata/emp_model7.Rdata")
-load("inst/extdata/lewage_model7.Rdata")
-load("inst/extdata/hewage_model7.Rdata")
+<!-- ``` -->
 
 
-stargazer::stargazer(lese_model, hese_model, upf_model,
-                     emp_model, lewage_model, hewage_model,
-                     type = "html",
-                     title = "Model Results",
-                     column.labels = c("Low Educated Self-Employed",
-                                       "High Educated Self-Employed",
-                                       "Unpaid Family Worker",
-                                       "Employer", "Low Educated Wage Worker",
-                                       "High Educated Wage Worker"),
-                     covariate.labels = c("Proportion of Area that is Urban",
-                                          "Zambezia", "Tete",
-                                          "Sofala", "Maputo City",
-                                          "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate",
-                                          "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate",
-                                          "Own Fridge Rate", "Own Car Rate"),
-                     dep.var.caption = " ",
-                     dep.var.labels = "Proportion of Worker Type")
+<!-- ##### Regression containing only Log Cell tower count per sqkm (and all the city and asset controls only) -->
+<!-- ```{r, echo=FALSE, include=TRUE, results="asis"} -->
 
-```
+<!-- load("inst/extdata/lese_model6.Rdata") -->
+<!-- load("inst/extdata/hese_model6.Rdata") -->
+<!-- load("inst/extdata/upf_model6.Rdata") -->
+<!-- load("inst/extdata/emp_model6.Rdata") -->
+<!-- load("inst/extdata/lewage_model6.Rdata") -->
+<!-- load("inst/extdata/hewage_model6.Rdata") -->
 
 
-##### Regression containing only internet usage (and all the city and asset controls only)
-```{r, echo=FALSE, include=TRUE, results="asis"}
+<!-- stargazer::stargazer(lese_model, hese_model, upf_model, -->
+<!--                      emp_model, lewage_model, hewage_model, -->
+<!--                      type = "html", -->
+<!--                      title = "Model Results", -->
+<!--                      column.labels = c("Low Educated Self-Employed", -->
+<!--                                        "High Educated Self-Employed", -->
+<!--                                        "Unpaid Family Worker", -->
+<!--                                        "Employer", "Low Educated Wage Worker", -->
+<!--                                        "High Educated Wage Worker"), -->
+<!--                      covariate.labels = c("Log Cell Tower Count per sqkm", -->
+<!--                                           "Zambezia", "Tete", -->
+<!--                                           "Sofala", "Maputo City", -->
+<!--                                           "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate", -->
+<!--                                           "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate", -->
+<!--                                           "Own Fridge Rate", "Own Car Rate"), -->
+<!--                      dep.var.caption = " ", -->
+<!--                      dep.var.labels = "Proportion of Worker Type") -->
 
-load("inst/extdata/lese_model8.Rdata")
-load("inst/extdata/hese_model8.Rdata")
-load("inst/extdata/upf_model8.Rdata")
-load("inst/extdata/emp_model8.Rdata")
-load("inst/extdata/lewage_model8.Rdata")
-load("inst/extdata/hewage_model8.Rdata")
+<!-- ``` -->
 
 
-stargazer::stargazer(lese_model, hese_model, upf_model,
-                     emp_model, lewage_model, hewage_model,
-                     type = "html",
-                     title = "Model Results",
-                     column.labels = c("Low Educated Self-Employed",
-                                       "High Educated Self-Employed",
-                                       "Unpaid Family Worker",
-                                       "Employer", "Low Educated Wage Worker",
-                                       "High Educated Wage Worker"),
-                     covariate.labels = c("Internet Usage Rate",
-                                          "Zambezia", "Tete",
-                                          "Sofala", "Maputo City",
-                                          "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate",
-                                          "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate",
-                                          "Own Fridge Rate", "Own Car Rate"),
-                     dep.var.caption = " ",
-                     dep.var.labels = "Proportion of Worker Type")
+<!-- ##### Regression containing only Urban Building (and all the city and asset controls only) -->
+<!-- ```{r, echo=FALSE, include=TRUE, results="asis"} -->
 
-```
+<!-- load("inst/extdata/lese_model7.Rdata") -->
+<!-- load("inst/extdata/hese_model7.Rdata") -->
+<!-- load("inst/extdata/upf_model7.Rdata") -->
+<!-- load("inst/extdata/emp_model7.Rdata") -->
+<!-- load("inst/extdata/lewage_model7.Rdata") -->
+<!-- load("inst/extdata/hewage_model7.Rdata") -->
 
 
-##### Regression containing only mobile money usage rate (and all the city and asset controls only)
-```{r, echo=FALSE, include=TRUE, results="asis"}
+<!-- stargazer::stargazer(lese_model, hese_model, upf_model, -->
+<!--                      emp_model, lewage_model, hewage_model, -->
+<!--                      type = "html", -->
+<!--                      title = "Model Results", -->
+<!--                      column.labels = c("Low Educated Self-Employed", -->
+<!--                                        "High Educated Self-Employed", -->
+<!--                                        "Unpaid Family Worker", -->
+<!--                                        "Employer", "Low Educated Wage Worker", -->
+<!--                                        "High Educated Wage Worker"), -->
+<!--                      covariate.labels = c("Proportion of Area that is Urban", -->
+<!--                                           "Zambezia", "Tete", -->
+<!--                                           "Sofala", "Maputo City", -->
+<!--                                           "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate", -->
+<!--                                           "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate", -->
+<!--                                           "Own Fridge Rate", "Own Car Rate"), -->
+<!--                      dep.var.caption = " ", -->
+<!--                      dep.var.labels = "Proportion of Worker Type") -->
 
-load("inst/extdata/lese_model9.Rdata")
-load("inst/extdata/hese_model9.Rdata")
-load("inst/extdata/upf_model9.Rdata")
-load("inst/extdata/emp_model9.Rdata")
-load("inst/extdata/lewage_model9.Rdata")
-load("inst/extdata/hewage_model9.Rdata")
+<!-- ``` -->
 
 
-stargazer::stargazer(lese_model, hese_model, upf_model,
-                     emp_model, lewage_model, hewage_model,
-                     type = "html",
-                     title = "Model Results",
-                     column.labels = c("Low Educated Self-Employed",
-                                       "High Educated Self-Employed",
-                                       "Unpaid Family Worker",
-                                       "Employer", "Low Educated Wage Worker",
-                                       "High Educated Wage Worker"),
-                     covariate.labels = c("Mobile Money Usage Rate",
-                                          "Zambezia", "Tete",
-                                          "Sofala", "Maputo City",
-                                          "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate",
-                                          "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate",
-                                          "Own Fridge Rate", "Own Car Rate"),
-                     dep.var.caption = " ",
-                     dep.var.labels = "Proportion of Worker Type")
+<!-- ##### Regression containing only internet usage (and all the city and asset controls only) -->
+<!-- ```{r, echo=FALSE, include=TRUE, results="asis"} -->
 
-```
+<!-- load("inst/extdata/lese_model8.Rdata") -->
+<!-- load("inst/extdata/hese_model8.Rdata") -->
+<!-- load("inst/extdata/upf_model8.Rdata") -->
+<!-- load("inst/extdata/emp_model8.Rdata") -->
+<!-- load("inst/extdata/lewage_model8.Rdata") -->
+<!-- load("inst/extdata/hewage_model8.Rdata") -->
 
 
-##### Regression containing only log building density (and all the city and asset controls only)
-```{r, echo=FALSE, include=TRUE, results="asis"}
+<!-- stargazer::stargazer(lese_model, hese_model, upf_model, -->
+<!--                      emp_model, lewage_model, hewage_model, -->
+<!--                      type = "html", -->
+<!--                      title = "Model Results", -->
+<!--                      column.labels = c("Low Educated Self-Employed", -->
+<!--                                        "High Educated Self-Employed", -->
+<!--                                        "Unpaid Family Worker", -->
+<!--                                        "Employer", "Low Educated Wage Worker", -->
+<!--                                        "High Educated Wage Worker"), -->
+<!--                      covariate.labels = c("Internet Usage Rate", -->
+<!--                                           "Zambezia", "Tete", -->
+<!--                                           "Sofala", "Maputo City", -->
+<!--                                           "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate", -->
+<!--                                           "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate", -->
+<!--                                           "Own Fridge Rate", "Own Car Rate"), -->
+<!--                      dep.var.caption = " ", -->
+<!--                      dep.var.labels = "Proportion of Worker Type") -->
 
-load("inst/extdata/lese_model10.Rdata")
-load("inst/extdata/hese_model10.Rdata")
-load("inst/extdata/upf_model10.Rdata")
-load("inst/extdata/emp_model10.Rdata")
-load("inst/extdata/lewage_model10.Rdata")
-load("inst/extdata/hewage_model10.Rdata")
+<!-- ``` -->
 
 
-stargazer::stargazer(lese_model, hese_model, upf_model,
-                     emp_model, lewage_model, hewage_model,
-                     type = "html",
-                     title = "Model Results",
-                     column.labels = c("Low Educated Self-Employed",
-                                       "High Educated Self-Employed",
-                                       "Unpaid Family Worker",
-                                       "Employer", "Low Educated Wage Worker",
-                                       "High Educated Wage Worker"),
-                     covariate.labels = c("Log Building Density",
-                                          "Zambezia", "Tete",
-                                          "Sofala", "Maputo City",
-                                          "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate",
-                                          "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate",
-                                          "Own Fridge Rate", "Own Car Rate"),
-                     dep.var.caption = " ",
-                     dep.var.labels = "Proportion of Worker Type")
+<!-- ##### Regression containing only mobile money usage rate (and all the city and asset controls only) -->
+<!-- ```{r, echo=FALSE, include=TRUE, results="asis"} -->
 
-```
+<!-- load("inst/extdata/lese_model9.Rdata") -->
+<!-- load("inst/extdata/hese_model9.Rdata") -->
+<!-- load("inst/extdata/upf_model9.Rdata") -->
+<!-- load("inst/extdata/emp_model9.Rdata") -->
+<!-- load("inst/extdata/lewage_model9.Rdata") -->
+<!-- load("inst/extdata/hewage_model9.Rdata") -->
 
 
-##### Regression containing only log total building length (and all the city and asset controls only)
-```{r, echo=FALSE, include=TRUE, results="asis"}
+<!-- stargazer::stargazer(lese_model, hese_model, upf_model, -->
+<!--                      emp_model, lewage_model, hewage_model, -->
+<!--                      type = "html", -->
+<!--                      title = "Model Results", -->
+<!--                      column.labels = c("Low Educated Self-Employed", -->
+<!--                                        "High Educated Self-Employed", -->
+<!--                                        "Unpaid Family Worker", -->
+<!--                                        "Employer", "Low Educated Wage Worker", -->
+<!--                                        "High Educated Wage Worker"), -->
+<!--                      covariate.labels = c("Mobile Money Usage Rate", -->
+<!--                                           "Zambezia", "Tete", -->
+<!--                                           "Sofala", "Maputo City", -->
+<!--                                           "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate", -->
+<!--                                           "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate", -->
+<!--                                           "Own Fridge Rate", "Own Car Rate"), -->
+<!--                      dep.var.caption = " ", -->
+<!--                      dep.var.labels = "Proportion of Worker Type") -->
 
-load("inst/extdata/lese_model11.Rdata")
-load("inst/extdata/hese_model11.Rdata")
-load("inst/extdata/upf_model11.Rdata")
-load("inst/extdata/emp_model11.Rdata")
-load("inst/extdata/lewage_model11.Rdata")
-load("inst/extdata/hewage_model11.Rdata")
+<!-- ``` -->
 
 
-stargazer::stargazer(lese_model, hese_model, upf_model,
-                     emp_model, lewage_model, hewage_model,
-                     type = "html",
-                     title = "Model Results",
-                     column.labels = c("Low Educated Self-Employed",
-                                       "High Educated Self-Employed",
-                                       "Unpaid Family Worker",
-                                       "Employer", "Low Educated Wage Worker",
-                                       "High Educated Wage Worker"),
-                     covariate.labels = c("Log Total Building Length",
-                                          "Zambezia", "Tete",
-                                          "Sofala", "Maputo City",
-                                          "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate",
-                                          "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate",
-                                          "Own Fridge Rate", "Own Car Rate"),
-                     dep.var.caption = " ",
-                     dep.var.labels = "Proportion of Worker Type")
+<!-- ##### Regression containing only log building density (and all the city and asset controls only) -->
+<!-- ```{r, echo=FALSE, include=TRUE, results="asis"} -->
 
-```
+<!-- load("inst/extdata/lese_model10.Rdata") -->
+<!-- load("inst/extdata/hese_model10.Rdata") -->
+<!-- load("inst/extdata/upf_model10.Rdata") -->
+<!-- load("inst/extdata/emp_model10.Rdata") -->
+<!-- load("inst/extdata/lewage_model10.Rdata") -->
+<!-- load("inst/extdata/hewage_model10.Rdata") -->
+
+
+<!-- stargazer::stargazer(lese_model, hese_model, upf_model, -->
+<!--                      emp_model, lewage_model, hewage_model, -->
+<!--                      type = "html", -->
+<!--                      title = "Model Results", -->
+<!--                      column.labels = c("Low Educated Self-Employed", -->
+<!--                                        "High Educated Self-Employed", -->
+<!--                                        "Unpaid Family Worker", -->
+<!--                                        "Employer", "Low Educated Wage Worker", -->
+<!--                                        "High Educated Wage Worker"), -->
+<!--                      covariate.labels = c("Log Building Density", -->
+<!--                                           "Zambezia", "Tete", -->
+<!--                                           "Sofala", "Maputo City", -->
+<!--                                           "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate", -->
+<!--                                           "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate", -->
+<!--                                           "Own Fridge Rate", "Own Car Rate"), -->
+<!--                      dep.var.caption = " ", -->
+<!--                      dep.var.labels = "Proportion of Worker Type") -->
+
+<!-- ``` -->
+
+
+<!-- ##### Regression containing only log total building length (and all the city and asset controls only) -->
+<!-- ```{r, echo=FALSE, include=TRUE, results="asis"} -->
+
+<!-- load("inst/extdata/lese_model11.Rdata") -->
+<!-- load("inst/extdata/hese_model11.Rdata") -->
+<!-- load("inst/extdata/upf_model11.Rdata") -->
+<!-- load("inst/extdata/emp_model11.Rdata") -->
+<!-- load("inst/extdata/lewage_model11.Rdata") -->
+<!-- load("inst/extdata/hewage_model11.Rdata") -->
+
+
+<!-- stargazer::stargazer(lese_model, hese_model, upf_model, -->
+<!--                      emp_model, lewage_model, hewage_model, -->
+<!--                      type = "html", -->
+<!--                      title = "Model Results", -->
+<!--                      column.labels = c("Low Educated Self-Employed", -->
+<!--                                        "High Educated Self-Employed", -->
+<!--                                        "Unpaid Family Worker", -->
+<!--                                        "Employer", "Low Educated Wage Worker", -->
+<!--                                        "High Educated Wage Worker"), -->
+<!--                      covariate.labels = c("Log Total Building Length", -->
+<!--                                           "Zambezia", "Tete", -->
+<!--                                           "Sofala", "Maputo City", -->
+<!--                                           "Own Radio Rate", "Own TV Rate", "Own Landline Phone Rate", -->
+<!--                                           "Own Laptop Rate", "Own Iron Rate", "Own Electric Stove Rate", -->
+<!--                                           "Own Fridge Rate", "Own Car Rate"), -->
+<!--                      dep.var.caption = " ", -->
+<!--                      dep.var.labels = "Proportion of Worker Type") -->
+
+<!-- ``` -->
 
 
 

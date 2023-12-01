@@ -11,7 +11,10 @@ if (Sys.info()[["user"]] == "wb570371"){
 
 packages <- c("sf", "fst", "tidyverse", "dplyr",
               "data.table", "tmap", "leaflet", "questionr", "Hmisc",
-              "corrr", "ggbiplot", "lmtest", "sandwich", "ggspatial")
+              "corrr", "lmtest", "sandwich", "ggspatial")
+
+devtools::install_github("vqv/ggbiplot")
+
 # devtools::load_all()
 load_packages(packages)
 
@@ -754,12 +757,30 @@ ggsave("inst/plots/informalplots/barplot_mobilemoney_selectcities.png")
 shp_dt <- sf::read_sf(dsn = "//esapov/esapov/MOZ/GEO/Population/poppoly",
                       layer = "moz_poppoly_full_gridded")
 
-elect_loc <- "inst/extdata/elect"
-raster_list <- list.files(elect_loc, "_2019")
+# elect_loc <- "inst/extdata/elect"
+# raster_list <- list.files(elect_loc, "_2019")
 
-raster_list <- unlist(lapply(elect_loc, paste, raster_list,  sep = "/"))
+#### download and read in electrification data from the HREA system
+pacman::p_load(rstac, magrittr, raster)
 
-raster_list <- lapply(raster_list, raster::raster)
+s_obj <- stac("https://planetarycomputer.microsoft.com/api/stac/v1")
+
+it_obj <- s_obj %>%
+  stac_search(collections = "hrea",
+              bbox = sf::st_bbox(shp_dt)) %>%
+  get_request() %>%
+  items_sign(sign_fn = sign_planetary_computer())
+
+raster_list <- list(paste0("/vsicurl/", it_obj$features[[5]]$assets$`light-composite`$href),
+                    paste0("/vsicurl/", it_obj$features[[5]]$assets$lightscore$href),
+                    paste0("/vsicurl/", it_obj$features[[5]]$assets$`night-proportion`$href),
+                    paste0("/vsicurl/", it_obj$features[[5]]$assets$`estimated-brightness`$href))
+
+raster_list <- lapply(raster_list,
+                      terra::rast)
+
+raster_list <- lapply(raster_list,
+                      raster)
 
 ### drop unpopulated areas
 shp_dt <- shp_dt[shp_dt$population > 0,]
