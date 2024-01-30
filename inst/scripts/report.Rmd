@@ -29,7 +29,8 @@ load("inst/extdata/lewage_model_wendy2.Rdata")
 load("inst/extdata/hewage_model_wendy2.Rdata")
 
 
-stargazer::stargazer(lese_model, hese_model, upf_model, emp_model, lewage_model, hewage_model,
+
+stargazer::stargazer(c(lese_model, hese_model, upf_model, emp_model, lewage_model, hewage_model),
                      type = "html",
                      title = "Model Results",
                      column.labels = c("Low Educated Self-Employed", "High Educated Self-Employed",

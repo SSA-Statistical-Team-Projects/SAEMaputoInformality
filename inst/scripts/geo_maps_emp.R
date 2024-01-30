@@ -11,9 +11,10 @@ if (Sys.info()[["user"]] == "wb570371"){
 
 packages <- c("sf", "fst", "tidyverse", "dplyr",
               "data.table", "tmap", "leaflet", "questionr", "Hmisc",
-              "corrr", "lmtest", "sandwich", "ggspatial")
+              "corrr", "lmtest", "sandwich", "ggspatial", "sjmisc",
+              "ggbiplot")
 
-devtools::install_github("vqv/ggbiplot")
+# devtools::install_github("vqv/ggbiplot")
 
 # devtools::load_all()
 load_packages(packages)
@@ -782,6 +783,23 @@ raster_list <- lapply(raster_list,
 raster_list <- lapply(raster_list,
                       raster)
 
+mapply(FUN = function(x, y){
+
+  raster::writeRaster(x = x,
+                      filename = paste0("inst/extdata/","hrea", y, ".tif"))
+
+},
+SIMPLIFY = FALSE,
+x = raster_list,
+y = c("rade9lnmu_2019", "lightscore_sy_2019",
+      "prplit_conf90_sy_2019", "set_zscore_sy_2019"))
+
+raster_list <- lapply(X = paste0("inst/extdata/","hrea",
+                                 c("rade9lnmu_2019", "lightscore_sy_2019",
+                                   "prplit_conf90_sy_2019", "set_zscore_sy_2019"),
+                                 ".tif"),
+                      raster::raster)
+
 ### drop unpopulated areas
 shp_dt <- shp_dt[shp_dt$population > 0,]
 
@@ -790,7 +808,22 @@ elect_dt <- parallel_extract(shp_dt = shp_dt[,c("poly_id", "geometry")],
                              fun_list = rep("mean", length(raster_list)),
                              numCores = length(raster_list))
 
+
+# elect_dt <- lapply(X = raster_list,
+#                    function(x){
+#
+#
+#                      y <- exact_extract(x = x,
+#                                         y = shp_dt[,c("poly_id", "geometry")],
+#                                         fun = "mean")
+#
+#                      return(y)
+#
+#                    })
+
 elect_dt <- as.data.table(elect_dt)
+
+saveRDS(elect_dt, "inst/extdata/hrea_ntl.rds")
 
 colnames(elect_dt) <- c("rade9lmu", "set_lightscore_sy", "set_prplit_conf90", "set_zscore_sy")
 
@@ -1045,22 +1078,22 @@ cols <- c("cellownership_rate", "bankaccount_rate", "haveinternet_rate", "use_in
           "bld_density", "bld_imagery_year", "bld_mean_area", "bld_mean_length", "bld_total_area",
           "bld_total_length", "bld_urban", "bld_cell_area", "population")
 
-corr_dt <-
-master_dt[Distrito %in% city_list | Provincia %in% "Maputo Cidade",] %>%
-  group_by(informal_name) %>%
-  do({
-    correlate(select(., c(bld_count:mobile_money_rate, iw_count, iw_rate, liw_count:Tower_per_sqkm)))
-  })
-
-corr_dt <-
-corr_dt %>%
-  filter(!is.na(informal_name))
-
-corr_dt <-
-corr_dt %>%
-  select(informal_name, term, liw_count, iw_rate)
-
-
+# corr_dt <-
+# master_dt[Distrito %in% city_list | Provincia %in% "Maputo Cidade",] %>%
+#   group_by(informal_name) %>%
+#   do({
+#     correlate(select(., c(bld_count:mobile_money_rate, iw_count, iw_rate, liw_count:Tower_per_sqkm)))
+#   })
+#
+# corr_dt <-
+# corr_dt %>%
+#   filter(!is.na(informal_name))
+#
+# corr_dt <-
+# corr_dt %>%
+#   select(informal_name, term, liw_count, iw_rate)
+#
+#
 add_dt <-
 master_dt %>%
   sjmisc::to_dummy(Provincia)
@@ -1070,35 +1103,35 @@ colnames(add_dt) <- gsub(" ", "", unique(master_dt$Provincia)[!is.na(unique(mast
 master_dt <-
 master_dt %>%
   cbind(., add_dt)
-
-corr_dt$labels[corr_dt$term == "bld_count"] <- "Building Count"
-corr_dt$labels[corr_dt$term == "bld_cv_area"] <- "Building Area Coefficient of Variation"
-corr_dt$labels[corr_dt$term == "bld_cv_length"] <- "Building Length Coefficient of Variation"
-corr_dt$labels[corr_dt$term == "bld_density"] <- "Building Density"
-corr_dt$labels[corr_dt$term == "bld_imagery_year"] <- "Year of Building Imagery"
-corr_dt$labels[corr_dt$term == "bld_mean_area"] <- "Building Mean Area"
-corr_dt$labels[corr_dt$term == "bld_mean_length"] <- "Building Mean Length"
-corr_dt$labels[corr_dt$term == "bld_total_area"] <- "Building Total Area"
-corr_dt$labels[corr_dt$term == "bld_total_length"] <- "Building Total Length"
-corr_dt$labels[corr_dt$term == "bld_urban"] <- "Proportion of Area that is Urban"
-corr_dt$labels[corr_dt$term == "population"] <- "Population"
-corr_dt$labels[corr_dt$term == "rade9lmu"] <- "Nighttime light annual composite"
-corr_dt$labels[corr_dt$term == "set_lightscore_sy"] <- "Average likelihood of electrification"
-corr_dt$labels[corr_dt$term == "set_prplit_conf90"] <- "Proportion of nights area is statistically brighter than matched unhabited areas"
-corr_dt$labels[corr_dt$term == "set_zscore_sy"] <- "Statistically estimated brightness levels"
-corr_dt$labels[corr_dt$term == "cellownership_rate"] <- "Rate of Cell Phone Ownership"
-corr_dt$labels[corr_dt$term == "bankaccount_rate"] <- "Rate of Bank Account Ownership"
-corr_dt$labels[corr_dt$term == "haveinternet_rate"] <- "Internet Ownership Rate"
-corr_dt$labels[corr_dt$term == "use_internet_rate"] <- "Internet Use Rate"
-corr_dt$labels[corr_dt$term == "mobile_money_rate"] <- "Mobile Money Usage Rate"
-corr_dt$labels[corr_dt$term == "iw_count"] <- "# workers in specific class"
-corr_dt$labels[corr_dt$term == "iw_rate"] <- "Proportion of workers in specific class"
-corr_dt$labels[corr_dt$term == "liw_count"] <- "Log of workers in specific class"
-corr_dt$labels[corr_dt$term == "lbld_count"] <- "Log Building Count"
-corr_dt$labels[corr_dt$term == "lpop"] <- "Log Population"
-corr_dt$labels[corr_dt$term == "Tower_per_sqkm"] <- "Number of Cell towers per sqkm"
-
-write.csv(corr_dt, "inst/extdata/corr.csv")
+#
+# corr_dt$labels[corr_dt$term == "bld_count"] <- "Building Count"
+# corr_dt$labels[corr_dt$term == "bld_cv_area"] <- "Building Area Coefficient of Variation"
+# corr_dt$labels[corr_dt$term == "bld_cv_length"] <- "Building Length Coefficient of Variation"
+# corr_dt$labels[corr_dt$term == "bld_density"] <- "Building Density"
+# corr_dt$labels[corr_dt$term == "bld_imagery_year"] <- "Year of Building Imagery"
+# corr_dt$labels[corr_dt$term == "bld_mean_area"] <- "Building Mean Area"
+# corr_dt$labels[corr_dt$term == "bld_mean_length"] <- "Building Mean Length"
+# corr_dt$labels[corr_dt$term == "bld_total_area"] <- "Building Total Area"
+# corr_dt$labels[corr_dt$term == "bld_total_length"] <- "Building Total Length"
+# corr_dt$labels[corr_dt$term == "bld_urban"] <- "Proportion of Area that is Urban"
+# corr_dt$labels[corr_dt$term == "population"] <- "Population"
+# corr_dt$labels[corr_dt$term == "rade9lmu"] <- "Nighttime light annual composite"
+# corr_dt$labels[corr_dt$term == "set_lightscore_sy"] <- "Average likelihood of electrification"
+# corr_dt$labels[corr_dt$term == "set_prplit_conf90"] <- "Proportion of nights area is statistically brighter than matched unhabited areas"
+# corr_dt$labels[corr_dt$term == "set_zscore_sy"] <- "Statistically estimated brightness levels"
+# corr_dt$labels[corr_dt$term == "cellownership_rate"] <- "Rate of Cell Phone Ownership"
+# corr_dt$labels[corr_dt$term == "bankaccount_rate"] <- "Rate of Bank Account Ownership"
+# corr_dt$labels[corr_dt$term == "haveinternet_rate"] <- "Internet Ownership Rate"
+# corr_dt$labels[corr_dt$term == "use_internet_rate"] <- "Internet Use Rate"
+# corr_dt$labels[corr_dt$term == "mobile_money_rate"] <- "Mobile Money Usage Rate"
+# corr_dt$labels[corr_dt$term == "iw_count"] <- "# workers in specific class"
+# corr_dt$labels[corr_dt$term == "iw_rate"] <- "Proportion of workers in specific class"
+# corr_dt$labels[corr_dt$term == "liw_count"] <- "Log of workers in specific class"
+# corr_dt$labels[corr_dt$term == "lbld_count"] <- "Log Building Count"
+# corr_dt$labels[corr_dt$term == "lpop"] <- "Log Population"
+# corr_dt$labels[corr_dt$term == "Tower_per_sqkm"] <- "Number of Cell towers per sqkm"
+#
+# write.csv(corr_dt, "inst/extdata/corr.csv")
 
 #### run some regressions
 
