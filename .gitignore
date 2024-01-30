@@ -5,10 +5,10 @@
 .DS_Store
 inst/doc
 
-inst/extdata/elect/Mozambique_set_prplit_conf90_sy_2019.tif
-inst/extdata/elect/Mozambique_set_lightscore_sy_2019.tif
-inst/extdata/elect/Mozambique_set_zscore_sy_2019.tif
-inst/extdata/elect/Mozambique_rade9lnmu_2019.tif
+inst/extdata/hreaprplit_conf90_sy_2019.tif
+inst/extdata/hrealightscore_sy_2019.tif
+inst/extdata/hreaset_zscore_sy_2019.tif
+inst/extdata/hrearade9lnmu_2019.tif
 
 inst/extdata/informal_envir.Rdata
 
